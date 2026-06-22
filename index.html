@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a120b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ApothecaryQuest — The Botanist's Crucible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Cinzel+Decorative:wght@700;900&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ap-gold:#f0c840; --ap-gold-bright:#ffd700;
+  --ap-rare:#5ec8ff; --ap-leg:#ffcd44; --ap-com:#7ed85a; --ap-myth:#ff6cb6; --ap-danger:#ff5a4d;
+  --ap-bg:#1a120b; --ap-bg2:#241810; --ap-wood:#3a2616; --ap-wood-lt:#5a3d22;
+  --ap-parch:#e8d9b5; --ap-parch-dk:#cbb789; --ap-green:#6fae5a; --ap-amber:#c9842b;
+  --font-pixel:'Press Start 2P',monospace;
+  --font-read:'VT323',monospace;
+  --font-disp:'Cinzel Decorative',serif;
+  --arena-rgb:122,108,255;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;min-height:100%;background:var(--ap-bg);overflow-x:hidden;}
+body{
+  font-family:var(--font-read);color:var(--ap-parch);
+  background:radial-gradient(ellipse at 50% -10%, #3a2616 0%, #1a120b 60%, #0d0905 100%);
+  min-height:100vh;-webkit-font-smoothing:none;position:relative;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 1px, transparent 1px 3px);mix-blend-mode:multiply;opacity:.5;}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center, transparent 56%, rgba(0,0,0,.55) 100%);}
+h1,h2,h3{font-family:var(--font-disp);letter-spacing:.02em;margin:0;}
+button{font-family:var(--font-read);cursor:pointer;}
+.pixel{font-family:var(--font-pixel);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:#5a3d22;border-radius:6px;}
+::-webkit-scrollbar-track{background:#1a120b;}
+
+/* ====== FX canvas (global particles) ====== */
+#fxCanvas{position:fixed;inset:0;z-index:7000;pointer-events:none;}
+
+/* ====== Generic helpers ====== */
+.gold{color:var(--ap-gold);} .grn{color:var(--ap-green);} .red{color:var(--ap-danger);}
+.center{text-align:center;}
+.btn{font-family:var(--font-pixel);font-size:11px;color:#1a120b;background:linear-gradient(180deg,#ffe98a,#f0c840 60%,#c9842b);
+  border:3px solid #2a1a0a;border-radius:9px;padding:13px 16px;box-shadow:0 4px 0 #6a4a18,0 6px 14px rgba(0,0,0,.4);letter-spacing:.05em;}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #6a4a18;}
+.btn.green{background:linear-gradient(180deg,#9be37e,#6fae5a 60%,#4a7a38);box-shadow:0 4px 0 #2f5226;}
+.btn.green:active{box-shadow:0 1px 0 #2f5226;}
+.btn.blue{background:linear-gradient(180deg,#9fdcff,#5ec8ff 60%,#2a8ac0);box-shadow:0 4px 0 #2a6a8a;}
+.btn.ghost{background:#241810;color:var(--ap-parch);border-color:#5a3d22;box-shadow:0 4px 0 #2a1a0a;}
+.btn.sm{font-size:9px;padding:9px 11px;}
+.btn:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed;}
+
+/* ============ FLOATING BOTANICALS ============ */
+.floatherbs{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+.fh{position:absolute;bottom:-40px;opacity:0;animation:floatup linear infinite;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));}
+@keyframes floatup{0%{transform:translateY(0) rotate(0);opacity:0}12%{opacity:.5}88%{opacity:.5}100%{transform:translateY(-104vh) rotate(38deg);opacity:0}}
+
+/* ============ PASSWORD GATE ============ */
+#gate{position:fixed;inset:0;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;text-align:center;padding:0 22px;background:radial-gradient(ellipse at 50% 35%,#2a1d10 0%,#15100a 55%,#0a0603 100%);}
+#gate .lockwrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+#gate .lock{font-size:62px;filter:drop-shadow(0 0 20px rgba(240,200,64,.7));animation:bob 3.4s ease-in-out infinite;position:relative;z-index:3;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#gate h2{font-size:clamp(26px,6vw,46px);position:relative;z-index:3;font-weight:900;
+  background:linear-gradient(180deg,#fff3c4,#ffd700 40%,#c9842b);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #2a1a0a);}
+#gate .gsub{font-family:var(--font-pixel);font-size:10px;letter-spacing:.3em;color:var(--ap-green);position:relative;z-index:3;}
+#gate .pwrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;position:relative;z-index:3;margin-top:6px;}
+#gate input{font-family:var(--font-read);font-size:24px;color:var(--ap-parch);background:#1a120b;border:3px solid #5a3d22;
+  border-radius:10px;padding:12px 16px;text-align:center;outline:none;letter-spacing:.12em;width:210px;}
+#gate input:focus{border-color:var(--ap-gold);box-shadow:0 0 16px rgba(240,200,64,.45);}
+#gate .err{color:var(--ap-danger);font-size:18px;min-height:22px;position:relative;z-index:3;text-shadow:0 0 8px rgba(255,90,77,.5);}
+
+/* ============ SCREENS ============ */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+
+/* TITLE */
+#titleScreen{position:relative;overflow:hidden;display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:16px;min-height:100vh;background:radial-gradient(ellipse at 50% 30%, #4a3018 0%, #1a120b 65%, #0a0603 100%);}
+#titleScreen.active{display:flex;}
+.aurora{position:absolute;inset:-20%;z-index:0;filter:blur(70px);opacity:.55;pointer-events:none;}
+.blob{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:drift 14s ease-in-out infinite alternate;}
+.b1{width:46vw;height:46vw;left:6%;top:8%;background:#6fae5a;}
+.b2{width:40vw;height:40vw;right:4%;top:20%;background:#c9842b;animation-delay:-4s;}
+.b3{width:38vw;height:38vw;left:30%;bottom:2%;background:#ffd700;animation-delay:-8s;opacity:.5;}
+.b4{width:34vw;height:34vw;left:55%;top:5%;background:#7a6cff;animation-delay:-6s;opacity:.4;}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(6%,-5%) scale(1.18)}}
+.sparkles{position:absolute;inset:0;z-index:1;mix-blend-mode:screen;pointer-events:none;}
+.shelfline{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:27px;opacity:.22;letter-spacing:9px;z-index:2;pointer-events:none;}
+.corner{position:absolute;font-size:40px;opacity:.3;z-index:2;pointer-events:none;animation:sway 5s ease-in-out infinite;}
+.corner.tl{top:14px;left:16px;} .corner.tr{top:14px;right:16px;animation-delay:-2.5s;}
+@keyframes sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+#titleScreen .wrap{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 18px;}
+.crest{font-size:54px;line-height:1;filter:drop-shadow(0 0 18px rgba(240,200,64,.8));animation:bob 3.4s ease-in-out infinite;}
+.gametitle{font-weight:900;font-size:clamp(34px,8vw,76px);line-height:1.02;
+  background:linear-gradient(180deg,#fff3c4 0%,#ffd700 38%,#c9842b 78%,#8a5a1e 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 #2a1a0a) drop-shadow(0 0 22px rgba(255,215,0,.45));animation:logoin 1.3s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes logoin{0%{opacity:0;filter:blur(14px);transform:translateY(-26px) scale(.9)}100%{opacity:1;transform:none}}
+.subtitle{font-family:var(--font-pixel);font-size:clamp(8px,1.7vw,12px);color:var(--ap-green);letter-spacing:.4em;
+  animation:subin 1.6s ease .4s both;text-shadow:0 0 10px rgba(111,174,90,.6);}
+@keyframes subin{0%{opacity:0;letter-spacing:1em}100%{opacity:1;letter-spacing:.4em}}
+.divider{height:3px;width:min(440px,72vw);border-radius:3px;
+  background:linear-gradient(90deg,transparent,var(--ap-gold),#fff,var(--ap-gold),transparent);background-size:200% 100%;
+  animation:sweep 3s linear infinite;box-shadow:0 0 12px rgba(240,200,64,.7);}
+@keyframes sweep{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.tagline{font-size:22px;color:var(--ap-parch-dk);max-width:580px;line-height:1.16;}
+.hint{font-size:18px;color:#9a8358;}
+
+/* TOP BAR (shared in map/bench/grimoire/shop) */
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#3a2616,#241810);
+  border-bottom:3px solid #6a4a18;position:sticky;top:0;z-index:200;flex-wrap:wrap;}
+.topbar .logo{font-weight:900;font-size:20px;color:var(--ap-gold);text-shadow:0 2px 0 #2a1a0a;cursor:pointer;}
+.spacer{flex:1;}
+.stat{font-family:var(--font-pixel);font-size:10px;color:var(--ap-parch);background:#1a120b;border:2px solid #6a4a18;border-radius:6px;
+  padding:7px 9px;display:flex;align-items:center;gap:6px;}
+.stat b{color:var(--ap-gold-bright);}
+.navbtn{font-family:var(--font-pixel);font-size:9px;color:#1a120b;background:linear-gradient(180deg,#ffe98a,#f0c840);
+  border:2px solid #2a1a0a;border-radius:6px;padding:8px 10px;box-shadow:0 3px 0 #6a4a18;}
+.navbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #6a4a18;}
+.navbtn.ghost{background:#241810;color:var(--ap-parch);}
+
+/* ============ WORLD MAP ============ */
+.mapwrap{max-width:980px;margin:0 auto;padding:18px 16px 40px;}
+.maphead{text-align:center;margin-bottom:14px;}
+.maphead h2{font-size:30px;color:var(--ap-gold);}
+.maphead p{font-size:19px;color:var(--ap-parch-dk);margin:4px 0 0;}
+.mapboard{position:relative;border:3px solid #5a3d22;border-radius:16px;overflow:hidden;
+  background:linear-gradient(160deg,#243018,#1a1f12 50%,#14110a);box-shadow:inset 0 0 50px rgba(0,0,0,.6);min-height:520px;}
+.mapboard svg.paths{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+.zonenode{position:absolute;z-index:3;width:128px;transform:translate(-50%,-50%);text-align:center;cursor:pointer;transition:transform .15s;}
+.zonenode:hover{transform:translate(-50%,-50%) scale(1.06);}
+.zonenode .orb{width:84px;height:84px;margin:0 auto;border-radius:18px;border:3px solid var(--zc,#7a6cff);
+  background:radial-gradient(circle at 38% 32%, rgba(255,255,255,.25), var(--zc) 70%);position:relative;overflow:hidden;
+  box-shadow:0 0 22px var(--zc),inset 0 0 18px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:40px;}
+.zonenode .orb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0 6px,transparent 6px 12px);}
+.zonenode .znm{font-family:var(--font-pixel);font-size:9px;margin-top:8px;color:var(--ap-parch);line-height:1.4;text-shadow:0 1px 2px #000;}
+.zonenode .zsub{font-size:14px;color:var(--zc);margin-top:2px;}
+.zonenode.cleared .orb{border-color:var(--ap-gold);box-shadow:0 0 26px var(--ap-gold);}
+.zonenode.cleared .orb::before{content:"★";position:absolute;font-size:20px;top:3px;right:6px;color:var(--ap-gold-bright);z-index:2;filter:drop-shadow(0 0 4px #000);}
+.zonenode.locked{filter:grayscale(.85) brightness(.55);cursor:not-allowed;}
+.zonenode.locked .orb::before{content:"🔒";position:absolute;font-size:26px;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;}
+.mapclouds{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:multiply;opacity:.5;}
+.cloud{position:absolute;font-size:60px;opacity:.5;animation:cloudmove linear infinite;}
+@keyframes cloudmove{0%{transform:translateX(-15vw)}100%{transform:translateX(110vw)}}
+.progressband{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px;font-size:19px;color:var(--ap-parch-dk);}
+.pbar{flex:0 0 240px;height:14px;border:2px solid #5a3d22;border-radius:8px;background:#1a120b;overflow:hidden;}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--ap-green),var(--ap-gold));width:0;transition:width .6s;}
+
+/* ============ BENCH / BATTLE ============ */
+.arena{position:relative;overflow:hidden;}
+.weather{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.wp{position:absolute;animation:wfall linear infinite;}
+@keyframes wfall{0%{transform:translateY(-10vh) translateX(0);opacity:0}10%{opacity:.7}90%{opacity:.7}100%{transform:translateY(110vh) translateX(30px);opacity:0}}
+@keyframes wrise{0%{transform:translateY(110vh);opacity:0}12%{opacity:.6}100%{transform:translateY(-10vh);opacity:0}}
+
+.bossstrip{position:relative;z-index:2;display:flex;align-items:center;gap:14px;max-width:1280px;margin:0 auto;padding:14px 16px 0;}
+.bossport{width:120px;height:120px;flex:0 0 120px;border:3px solid var(--zc);border-radius:14px;overflow:hidden;position:relative;
+  background:radial-gradient(circle at 50% 40%, rgba(var(--arena-rgb),.35), #0a0603 75%);box-shadow:0 0 24px rgba(var(--arena-rgb),.5);}
+.bossport .mon{position:absolute;inset:10px;animation:bossbob 3s ease-in-out infinite;}
+@keyframes bossbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.bossport.hurt{animation:bossHurt .35s;}
+@keyframes bossHurt{0%,100%{transform:none}25%{transform:translateX(-7px)}50%{filter:brightness(2) sepia(1) hue-rotate(-30deg)}75%{transform:translateX(7px)}}
+.bossport.dead{animation:bossDie 1s forwards;}
+@keyframes bossDie{0%{opacity:1}100%{opacity:0;transform:scale(.4) rotate(20deg)}}
+.bossmeta{flex:1;min-width:0;}
+.bossmeta .bnm{font-family:var(--font-disp);font-weight:900;font-size:clamp(18px,3.4vw,26px);color:var(--zc);text-shadow:0 0 14px rgba(var(--arena-rgb),.6);line-height:1;}
+.bossmeta .btaunt{font-size:18px;color:var(--ap-parch-dk);font-style:italic;margin-top:3px;line-height:1.15;min-height:22px;}
+.hpwrap{margin-top:8px;}
+.hpbar{height:18px;border:2px solid #2a1a0a;border-radius:9px;background:#2a0d0a;overflow:hidden;position:relative;}
+.hpbar i{display:block;height:100%;background:linear-gradient(90deg,#ff5a4d,#ffb14d);width:100%;transition:width .5s cubic-bezier(.2,.8,.2,1);}
+.hpbar.enraged i{background:linear-gradient(90deg,#ff2d1a,#ff7a3d);animation:enragePulse .5s infinite alternate;}
+@keyframes enragePulse{0%{filter:brightness(1)}100%{filter:brightness(1.4)}}
+.hplabel{font-family:var(--font-pixel);font-size:8px;color:var(--ap-parch);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-shadow:0 1px 2px #000;}
+.hearts{font-size:22px;letter-spacing:2px;margin-top:6px;}
+
+.bench{position:relative;z-index:2;display:grid;grid-template-columns:300px 1fr 300px;gap:14px;padding:14px 16px 24px;max-width:1280px;margin:0 auto;width:100%;}
+@media(max-width:1000px){.bench{grid-template-columns:1fr;}}
+.panel{background:linear-gradient(180deg,rgba(36,24,16,.92),rgba(26,18,11,.94));border:3px solid #5a3d22;border-radius:12px;padding:14px;
+  box-shadow:inset 0 0 26px rgba(0,0,0,.5);backdrop-filter:blur(2px);}
+.panel h3{margin:0 0 10px;font-size:17px;color:var(--ap-gold);letter-spacing:.04em;display:flex;align-items:center;gap:8px;
+  border-bottom:2px dashed #5a3d22;padding-bottom:8px;}
+.casecard{background:repeating-linear-gradient(0deg,#e8d9b5 0 22px,#e2d2aa 22px 23px);color:#2a1a0a;border-radius:8px;padding:14px;
+  border:2px solid #b89b66;box-shadow:0 4px 0 #9a8358, inset 0 0 0 1px #fff8e6;position:relative;}
+.casecard .who{font-family:var(--font-pixel);font-size:11px;color:#5a3d22;margin-bottom:6px;display:flex;align-items:center;gap:8px;line-height:1.3;}
+.casecard .av{font-size:26px;}
+.casecard .complaint{font-size:21px;line-height:1.18;}
+.casecard .flagrow{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;}
+.flag{font-family:var(--font-pixel);font-size:8px;padding:5px 7px;border-radius:5px;border:2px solid;}
+.flag.med{background:#fde8e6;border-color:#d9544a;color:#a32c22;}
+.flag.note{background:#e6f0fb;border-color:#5e9ed9;color:#2c5a8a;}
+.flag.preg{background:#fbe6f3;border-color:#d95ea8;color:#8a2c66;}
+
+.formrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;justify-content:center;}
+.formchip{font-family:var(--font-pixel);font-size:9px;color:var(--ap-parch);background:#1a120b;border:2px solid #5a3d22;border-radius:8px;
+  padding:9px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:64px;}
+.formchip .fi{font-size:20px;}
+.formchip.sel{border-color:var(--ap-gold);color:var(--ap-gold-bright);background:#2a1d10;box-shadow:0 0 12px rgba(240,200,64,.4);}
+
+.cauldron{display:flex;flex-direction:column;align-items:center;gap:8px;margin:4px 0 12px;}
+.cauldron svg{width:128px;height:120px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));}
+.cauldron .liquid{transition:fill .4s;}
+.slots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:66px;padding:10px;border:2px dashed #5a3d22;border-radius:10px;background:rgba(0,0,0,.25);}
+.slot-empty{font-size:18px;color:#6a4a28;align-self:center;}
+.benchitem{position:relative;background:#2a1d10;border:2px solid var(--ap-green);border-radius:8px;padding:7px 9px;font-size:17px;color:var(--ap-parch);display:flex;align-items:center;gap:6px;}
+.benchitem .emoji{font-size:18px;}
+.benchitem .x{font-family:var(--font-pixel);font-size:9px;color:var(--ap-danger);cursor:pointer;border:1px solid #5a3d22;border-radius:4px;padding:2px 4px;}
+.brewbtn{width:100%;font-family:var(--font-pixel);font-size:13px;color:#1a120b;margin-top:6px;
+  background:linear-gradient(180deg,#9be37e,#6fae5a 60%,#4a7a38);border:3px solid #2a1a0a;border-radius:10px;padding:14px;
+  box-shadow:0 4px 0 #2f5226,0 6px 14px rgba(0,0,0,.4);letter-spacing:.06em;}
+.brewbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #2f5226;}
+.brewbtn:disabled{filter:grayscale(.7) brightness(.7);cursor:not-allowed;}
+
+.shelf{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-height:60vh;overflow-y:auto;padding-right:4px;}
+@media(max-width:1000px){.shelf{grid-template-columns:1fr 1fr 1fr;max-height:none;}}
+@media(max-width:560px){.shelf{grid-template-columns:1fr 1fr;}}
+.icard{position:relative;background:linear-gradient(180deg,#2a1d10,#1a120b);border:2px solid var(--rar,#7ed85a);border-radius:9px;
+  padding:9px 7px;text-align:center;transition:transform .12s, box-shadow .12s;overflow:hidden;cursor:pointer;}
+.icard:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.5),0 0 12px var(--rar);}
+.icard .emoji{font-size:30px;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5));}
+.icard .nm{font-size:16px;color:var(--ap-parch);line-height:1.05;margin-top:4px;}
+.icard .lat{font-family:var(--font-pixel);font-size:6px;color:#9a8358;margin-top:3px;line-height:1.3;font-style:italic;}
+.icard .rar{position:absolute;top:5px;right:6px;font-family:var(--font-pixel);font-size:6px;color:var(--rar);}
+.icard .add{margin-top:7px;font-family:var(--font-pixel);font-size:8px;color:#1a120b;background:var(--rar);border:none;border-radius:5px;padding:6px 5px;width:100%;cursor:pointer;}
+.icard.danger{border-color:var(--ap-danger);}
+.icard.danger .rar,.icard.danger .add{color:#fff;background:var(--ap-danger);}
+.icard .info{position:absolute;top:4px;left:6px;font-size:13px;opacity:.7;}
+.icard.mastered::after{content:"★";position:absolute;bottom:5px;right:7px;color:var(--ap-gold-bright);font-size:14px;filter:drop-shadow(0 0 4px rgba(255,215,0,.8));}
+.icard.foil::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 48%,rgba(120,220,255,.25) 55%,transparent 70%);
+  background-size:250% 250%;animation:foilshine 3.5s linear infinite;pointer-events:none;mix-blend-mode:screen;}
+@keyframes foilshine{0%{background-position:160% 0}100%{background-position:-60% 0}}
+
+/* ============ MODALS ============ */
+.overlay{position:fixed;inset:0;z-index:6000;background:rgba(8,5,2,.82);display:none;align-items:center;justify-content:center;padding:18px;}
+.overlay.show{display:flex;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{background:linear-gradient(180deg,#2a1d10,#1a120b);border:3px solid var(--ap-gold);border-radius:14px;max-width:540px;width:100%;
+  max-height:88vh;overflow-y:auto;box-shadow:0 0 40px rgba(240,200,64,.3);}
+.modal .mhead{padding:14px 16px;border-bottom:2px solid #5a3d22;display:flex;align-items:center;gap:12px;}
+.modal .mbody{padding:16px;}
+.closeb{margin-left:auto;font-family:var(--font-pixel);font-size:10px;background:#1a120b;color:var(--ap-parch);border:2px solid #5a3d22;border-radius:6px;padding:7px 9px;}
+.note-emoji{font-size:46px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.5));}
+.note-title{font-weight:900;font-size:26px;color:var(--ap-gold);line-height:1;}
+.note-lat{font-style:italic;color:#9a8358;font-size:18px;}
+.note-sec{margin-top:12px;}
+.note-sec .lbl{font-family:var(--font-pixel);font-size:9px;letter-spacing:.06em;margin-bottom:5px;display:inline-block;padding:4px 7px;border-radius:5px;}
+.lbl.action{background:#234a20;color:#9be37e;border:1px solid #4a7a38;}
+.lbl.use{background:#1f3a52;color:#8fc6f5;border:1px solid #3a6a92;}
+.lbl.warn{background:#52201c;color:#ff9b90;border:1px solid #a3392c;}
+.lbl.prep{background:#4a3a14;color:#f0c840;border:1px solid #8a6a24;}
+.note-sec p{margin:0;font-size:19px;line-height:1.25;color:var(--ap-parch);}
+.note-sec.warn p{color:#ffb3aa;}
+.pharma{margin-top:14px;border:2px dashed var(--ap-rare);border-radius:10px;padding:12px;background:rgba(94,200,255,.07);}
+.pharma .ph-lbl{font-family:var(--font-pixel);font-size:9px;color:var(--ap-rare);letter-spacing:.05em;}
+.pharma .ph-drug{font-family:var(--font-disp);font-weight:900;font-size:22px;color:#bfe6ff;margin:5px 0;}
+.pharma p{font-size:18px;line-height:1.25;color:#cfe8fb;margin:0;}
+.revealbtn{font-family:var(--font-pixel);font-size:9px;color:#06222e;background:linear-gradient(180deg,#9fdcff,#5ec8ff);border:2px solid #2a6a8a;border-radius:7px;padding:9px 11px;box-shadow:0 3px 0 #2a6a8a;}
+.revealbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #2a6a8a;}
+
+.result-banner{text-align:center;padding:18px;}
+.result-banner .big{font-weight:900;font-size:34px;line-height:1;}
+.result-banner.good .big{color:var(--ap-com);text-shadow:0 0 18px rgba(126,216,90,.6);}
+.result-banner.bad .big{color:var(--ap-danger);text-shadow:0 0 18px rgba(255,90,77,.6);}
+.result-banner.warn .big{color:var(--ap-amber);text-shadow:0 0 18px rgba(201,132,43,.6);}
+.result-banner .icon{font-size:54px;display:block;margin-bottom:6px;}
+.rationale{padding:0 16px 16px;}
+.rationale .rline{background:#1a120b;border-left:4px solid var(--ap-gold);border-radius:6px;padding:11px 12px;margin-bottom:9px;font-size:18px;line-height:1.25;}
+.rationale .rline.bad{border-left-color:var(--ap-danger);} .rationale .rline.good{border-left-color:var(--ap-com);}
+.rationale .rline b{color:var(--ap-gold-bright);}
+.nextbtn{display:block;width:calc(100% - 32px);margin:4px 16px 18px;font-family:var(--font-pixel);font-size:12px;color:#1a120b;
+  background:linear-gradient(180deg,#ffe98a,#f0c840);border:3px solid #2a1a0a;border-radius:10px;padding:14px;box-shadow:0 4px 0 #6a4a18;}
+.nextbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #6a4a18;}
+
+.grim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.shop-grid{display:grid;gap:12px;}
+.shopitem{display:flex;align-items:center;gap:12px;background:#1a120b;border:2px solid #5a3d22;border-radius:10px;padding:12px;}
+.shopitem .si{font-size:34px;}
+.shopitem .sd{flex:1;}
+.shopitem .sd b{color:var(--ap-gold);font-size:18px;}
+.shopitem .sd p{margin:2px 0 0;font-size:16px;color:var(--ap-parch-dk);}
+
+/* CUTSCENE */
+#cutscene{position:fixed;inset:0;z-index:7500;background:radial-gradient(ellipse at 50% 40%,#241a3a,#0a0814 70%,#000);
+  display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:24px;overflow:hidden;}
+#cutscene.show{display:flex;}
+#cutscene .const{position:absolute;inset:0;z-index:0;}
+#cutscene .cs-wrap{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;}
+#cutscene .cs-title{font-weight:900;font-size:clamp(30px,7vw,60px);
+  background:linear-gradient(180deg,#fff,#ffd700 50%,#ff6cb6);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 24px rgba(255,215,0,.5));}
+#cutscene .cs-credit{font-family:var(--font-pixel);font-size:clamp(12px,2.4vw,18px);color:var(--ap-gold-bright);letter-spacing:.18em;text-shadow:0 0 14px rgba(255,215,0,.6);}
+#cutscene .cs-quote{font-size:22px;font-style:italic;color:var(--ap-parch-dk);max-width:560px;line-height:1.3;}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(60px);z-index:7800;
+  background:linear-gradient(180deg,#3a2616,#241810);border:2px solid var(--ap-gold);border-radius:10px;padding:11px 16px;font-size:18px;color:var(--ap-parch);
+  box-shadow:0 6px 20px rgba(0,0,0,.5);opacity:0;transition:.35s;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast b{color:var(--ap-gold-bright);}
+.achv{border-color:var(--ap-myth);}
+
+.foot{text-align:center;font-size:15px;color:#7a6440;padding:18px;line-height:1.4;position:relative;z-index:2;}
+.foot b{color:var(--ap-gold);}
+
+/* ============ STUDY HALL ============ */
+#studyScreen .studytabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:14px 12px 0;max-width:1000px;margin:0 auto;}
+.stab{font-family:var(--font-pixel);font-size:9px;color:var(--ap-parch);background:#1a120b;border:2px solid #5a3d22;border-radius:8px;padding:10px 12px;display:flex;gap:6px;align-items:center;}
+.stab.sel{border-color:var(--ap-gold);color:var(--ap-gold-bright);background:#2a1d10;box-shadow:0 0 12px rgba(240,200,64,.35);}
+.studybody{max-width:1000px;margin:0 auto;padding:18px 16px 50px;}
+.studyhd{text-align:center;margin-bottom:14px;}
+.studyhd h2{font-size:28px;color:var(--ap-gold);} .studyhd p{font-size:18px;color:var(--ap-parch-dk);margin:4px auto 0;max-width:640px;line-height:1.2;}
+.fcwrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.fcfilter{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.fcfilter button{font-family:var(--font-pixel);font-size:8px;color:var(--ap-parch);background:#1a120b;border:2px solid #5a3d22;border-radius:7px;padding:7px 9px;}
+.fcfilter button.sel{border-color:var(--zcf,#9b8cff);color:#fff;background:#2a1d10;}
+.fcstat{font-size:17px;color:var(--ap-parch-dk);text-align:center;} .fcstat b{color:var(--ap-gold-bright);}
+.fcard{perspective:1400px;width:min(440px,94vw);height:540px;cursor:pointer;}
+.fc-inner{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d;}
+.fc-inner.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;border:3px solid var(--rar,#7ed85a);
+  background:linear-gradient(180deg,#2a1d10,#16100a);box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 0 30px rgba(0,0,0,.4);padding:20px;display:flex;flex-direction:column;}
+.fc-front{align-items:center;justify-content:center;text-align:center;gap:10px;}
+.fc-front .fe{font-size:84px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5));}
+.fc-front .fn{font-family:var(--font-disp);font-weight:900;font-size:32px;color:var(--ap-gold);line-height:1;}
+.fc-front .fl{font-style:italic;color:#9a8358;font-size:20px;}
+.fc-front .fprompt{font-size:18px;color:var(--ap-parch-dk);margin-top:10px;line-height:1.2;}
+.fc-front .ftap{font-family:var(--font-pixel);font-size:9px;color:var(--ap-green);margin-top:10px;animation:pulsefade 1.6s ease-in-out infinite;}
+@keyframes pulsefade{0%,100%{opacity:.5}50%{opacity:1}}
+.fc-back{transform:rotateY(180deg);overflow-y:auto;text-align:left;}
+.fc-back .bnm{font-family:var(--font-disp);font-weight:900;font-size:22px;color:var(--ap-gold);margin-bottom:4px;}
+.rate{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.rate button{font-family:var(--font-pixel);font-size:10px;border:3px solid #2a1a0a;border-radius:10px;padding:12px 14px;color:#1a120b;box-shadow:0 4px 0 #2a1a0a;}
+.rate .again{background:linear-gradient(180deg,#ff9b90,#ff5a4d);} .rate .good{background:linear-gradient(180deg,#ffe98a,#f0c840);} .rate .easy{background:linear-gradient(180deg,#9be37e,#6fae5a);}
+.rate button:active{transform:translateY(3px);box-shadow:0 1px 0 #2a1a0a;}
+.mmsearch{width:100%;max-width:420px;display:block;margin:0 auto 14px;font-family:var(--font-read);font-size:20px;color:var(--ap-parch);background:#1a120b;border:3px solid #5a3d22;border-radius:10px;padding:11px 14px;outline:none;}
+.mmsearch:focus{border-color:var(--ap-gold);}
+.ixgroup{border:2px solid var(--ic,#ff5a4d);border-radius:12px;padding:14px;margin-bottom:12px;background:rgba(0,0,0,.25);}
+.ixgroup h4{font-family:var(--font-disp);font-weight:900;font-size:18px;color:var(--ic);margin:0 0 6px;line-height:1.1;}
+.ixgroup p{font-size:17px;color:var(--ap-parch-dk);margin:0 0 10px;line-height:1.25;}
+.ixchips{display:flex;flex-wrap:wrap;gap:7px;}
+.ixchip{display:flex;align-items:center;gap:5px;background:#1a120b;border:1px solid #5a3d22;border-radius:20px;padding:5px 11px 5px 8px;font-size:15px;color:var(--ap-parch);cursor:pointer;}
+.ixchip:hover{border-color:var(--ic);} .ixchip .ce{font-size:18px;}
+.progrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.progrow .pl{flex:0 0 160px;font-size:17px;color:var(--ap-parch);}
+.progrow .pbar2{flex:1;height:16px;border:2px solid #5a3d22;border-radius:8px;background:#1a120b;overflow:hidden;}
+.progrow .pbar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--pc,#6fae5a),var(--ap-gold));width:0;transition:width .6s;}
+.progrow .pv{flex:0 0 60px;text-align:right;font-family:var(--font-pixel);font-size:9px;color:var(--ap-gold-bright);}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.statbox{background:#1a120b;border:2px solid #5a3d22;border-radius:10px;padding:14px;text-align:center;}
+.statbox .sn{font-family:var(--font-disp);font-weight:900;font-size:28px;color:var(--ap-gold);} .statbox .sl{font-size:14px;color:var(--ap-parch-dk);}
+.achvlist{display:flex;flex-wrap:wrap;gap:8px;}
+.achvpill{font-size:15px;border:2px solid var(--ap-myth);border-radius:20px;padding:6px 12px;color:var(--ap-parch);background:rgba(255,108,182,.08);}
+.achvpill.locked{border-color:#5a3d22;color:#6a5a3a;background:transparent;}
+</style>
+</head>
+<body>
+<canvas id="fxCanvas"></canvas>
+
+<!-- ===================== PASSWORD GATE ===================== -->
+<div id="gate">
+  <div class="lockwrap"><div class="floatherbs" id="gateHerbs"></div></div>
+  <div class="lock">🔐</div>
+  <h2>The Crucible is Sealed</h2>
+  <div class="gsub">SPEAK THE APOTHECARY&rsquo;S WORD</div>
+  <div class="pwrow">
+    <input id="pw" type="password" placeholder="password" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')tryUnlock()">
+    <button class="btn" onclick="tryUnlock()">🔑 UNSEAL</button>
+  </div>
+  <div class="err" id="pwErr"></div>
+</div>
+
+<!-- ===================== TITLE ===================== -->
+<div id="titleScreen" class="screen">
+  <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+  <canvas class="sparkles" id="sparkCv"></canvas>
+  <div class="floatherbs" id="floatHerbs"></div>
+  <div class="corner tl">🌿</div><div class="corner tr">🌿</div>
+  <div class="shelfline">🍶 🧪 ⚗️ 🫙 🧴 🍶 🧪 🫙 🍶</div>
+  <div class="wrap">
+    <div class="crest">⚗️</div>
+    <h1 class="gametitle">ApothecaryQuest</h1>
+    <div class="subtitle">THE BOTANIST&rsquo;S CRUCIBLE</div>
+    <div class="divider"></div>
+    <div class="tagline">Six wilds. Six wraiths of imbalance. Compound the right remedy, master the plant and the drug hidden inside it, and break each boss to heal the land.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <button class="btn green" onclick="gotoMap()">▶ BEGIN THE QUEST</button>
+      <button class="btn ghost" onclick="openStudy()">📚 STUDY HALL</button>
+    </div>
+    <div class="hint" id="titleHint">6 zones · 39 botanicals · 26 cases</div>
+  </div>
+</div>
+
+<!-- ===================== MAP ===================== -->
+<div id="mapScreen" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="gotoTitle()">⚗️ ApothecaryQuest</div>
+    <div class="spacer"></div>
+    <div class="stat">🪙 <b id="m_coins">0</b></div>
+    <div class="stat">📖 <b id="m_mastered">0</b>/<b id="m_deck">39</b></div>
+    <button class="navbtn ghost" onclick="openStudy()">📚 STUDY</button>
+    <button class="navbtn ghost" onclick="openGrimoire()">📖 GRIMOIRE</button>
+    <button class="navbtn ghost" onclick="openShop()">🛒 SHOP</button>
+  </div>
+  <div class="mapwrap">
+    <div class="maphead">
+      <h2>The Six Wilds</h2>
+      <p>Choose a zone. Defeat its boss by compounding true.</p>
+    </div>
+    <div class="mapboard" id="mapboard">
+      <svg class="paths" id="mapPaths" preserveAspectRatio="none" viewBox="0 0 1000 540"></svg>
+      <div class="mapclouds" id="mapClouds"></div>
+      <!-- zone nodes injected -->
+    </div>
+    <div class="progressband">
+      <span>Quest progress</span>
+      <div class="pbar"><i id="questBar"></i></div>
+      <span><b id="clearedCount">0</b>/6 zones</span>
+    </div>
+  </div>
+  <div class="foot">A teaching game by <b>Dr. Akash Garg</b> · botanical content is for design review — verify before classroom use.</div>
+</div>
+
+<!-- ===================== BENCH ===================== -->
+<div id="benchScreen" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="confirmLeave()">⚗️ <span id="b_zoneName">Zone</span></div>
+    <div class="spacer"></div>
+    <div class="stat">🪙 <b id="b_coins">0</b></div>
+    <div class="stat">📜 <b id="b_caseNo">1</b>/<b id="b_caseTot">5</b></div>
+    <button class="navbtn ghost" onclick="confirmLeave()">🗺 MAP</button>
+  </div>
+  <div class="arena" id="arena">
+    <div class="weather" id="weather"></div>
+    <div class="bossstrip">
+      <div class="bossport" id="bossPort"><div class="mon" id="bossMon"></div></div>
+      <div class="bossmeta">
+        <div class="bnm" id="bossName">Boss</div>
+        <div class="btaunt" id="bossTaunt"></div>
+        <div class="hpwrap"><div class="hpbar" id="hpbar"><i id="hpfill"></i><div class="hplabel" id="hplabel">HP</div></div></div>
+        <div class="hearts" id="hearts">❤️❤️❤️</div>
+      </div>
+    </div>
+    <div class="bench">
+      <div class="panel" id="casePanel">
+        <h3>🧑‍⚕️ At the Counter</h3>
+        <div id="caseHolder"></div>
+        <div style="margin-top:12px;font-size:16px;color:#9a8358;line-height:1.3;border-top:2px dashed #5a3d22;padding-top:10px;">
+          Pick a <b class="gold">form</b>, add the right <b class="grn">botanicals</b>, then brew. Tap any card to study its notecard &amp; reveal the drug inside.
+        </div>
+      </div>
+      <div class="panel">
+        <h3>⚗️ Compounding Bench</h3>
+        <div class="formrow" id="formRow"></div>
+        <div class="cauldron" id="cauldron"></div>
+        <div class="slots" id="slots"><span class="slot-empty">— add botanicals from the shelf —</span></div>
+        <button class="brewbtn" id="brewBtn" onclick="brew()">⚗️ COMPOUND &amp; DISPENSE</button>
+      </div>
+      <div class="panel">
+        <h3>🌿 The Shelf</h3>
+        <div class="shelf" id="shelf"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STUDY HALL ===================== -->
+<div id="studyScreen" class="screen">
+  <div class="topbar">
+    <div class="logo" onclick="gotoMap()">📚 Study Hall</div>
+    <div class="spacer"></div>
+    <button class="navbtn" onclick="exportStudyGuide()">📄 EXPORT GUIDE</button>
+    <button class="navbtn ghost" onclick="gotoMap()">🗺 MAP</button>
+  </div>
+  <div class="studytabs" id="studyTabs"></div>
+  <div class="studybody" id="studyBody"></div>
+  <div class="foot">Study Hall · <b>Dr. Akash Garg</b> · flashcards use spaced repetition — your ratings persist between visits.</div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+<div class="overlay" id="noteOverlay" onclick="if(event.target===this)closeNote()"><div class="modal" id="noteModal"></div></div>
+<div class="overlay" id="resultOverlay"><div class="modal" id="resultModal"></div></div>
+<div class="overlay" id="grimOverlay" onclick="if(event.target===this)closeGrimoire()"><div class="modal" style="max-width:780px" id="grimModal"></div></div>
+<div class="overlay" id="shopOverlay" onclick="if(event.target===this)closeShop()"><div class="modal" id="shopModal"></div></div>
+
+<!-- ===================== CUTSCENE ===================== -->
+<div id="cutscene">
+  <canvas class="const" id="constCv"></canvas>
+  <div class="cs-wrap" id="csWrap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================================
+   ApothecaryQuest — The Botanist's Crucible  (single-file full game)
+   ========================================================================== */
+
+/* ---------- PRNG + pixel-monster graphics engine ---------- */
+function rngFrom(seed){let t=seed+0x6D2B79F5;return function(){t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function pixelMonster(z){
+  const r=rngFrom(z.seed),N=15,px=8,cells=[];
+  for(let y=0;y<N;y++){cells[y]=[];for(let x=0;x<N;x++)cells[y][x]=0;}
+  const cx=(N-1)/2, cy=N*0.56;
+  for(let y=2;y<N-1;y++)for(let x=0;x<=Math.floor(N/2);x++){
+    const dx=(x-cx)/(N*0.5), dy=(y-cy)/(N*0.5), d=Math.sqrt(dx*dx+dy*dy);
+    if(d < 0.82 + (r()-0.5)*0.30){cells[y][x]=1;cells[y][N-1-x]=1;}
+  }
+  // horns / spikes on top row of body
+  for(let x=0;x<N;x++){ if(cells[3] && cells[3][x]===1 && r()<0.5){cells[1][x]=2;cells[2][x]=2;} }
+  // accent speckle
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){ if(cells[y][x]===1 && r()<0.16) cells[y][x]=2; }
+  // eyes
+  const ey=Math.floor(N*0.44), exL=Math.floor(N*0.30), exR=N-1-exL;
+  if(cells[ey]){cells[ey][exL]=3;cells[ey][exR]=3;}
+  // mouth
+  const my=Math.floor(N*0.66);
+  if(cells[my]) for(let x=exL+1;x<exR;x+=2) if(cells[my][x]===1) cells[my][x]=2;
+  let out='';
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const c=cells[y][x]; if(!c)continue;
+    const col=c===1?z.body:c===2?z.accent:z.eye;
+    out+='<rect x="'+(x*px)+'" y="'+(y*px)+'" width="'+px+'" height="'+px+'" fill="'+col+'"/>';
+    if(c===1) out+='<rect x="'+(x*px+px-2)+'" y="'+(y*px+2)+'" width="2" height="'+(px-1)+'" fill="rgba(0,0,0,.28)"/>';
+    if(c===3) out+='<rect x="'+(x*px+2)+'" y="'+(y*px+2)+'" width="3" height="3" fill="#fff"/>';
+  }
+  return '<svg viewBox="0 0 '+(N*px)+' '+(N*px)+'" width="100%" height="100%" shape-rendering="crispEdges" style="filter:drop-shadow(0 0 6px '+z.accent+')">'+out+'</svg>';
+}
+
+/* ---------- Cauldron SVG ---------- */
+function cauldronSVG(){
+  return '<svg viewBox="0 0 128 120" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">'+
+   '<ellipse cx="64" cy="104" rx="40" ry="9" fill="rgba(0,0,0,.45)"/>'+
+   '<path d="M22 52 Q22 100 64 100 Q106 100 106 52 Z" fill="#2a2018" stroke="#0f0b06" stroke-width="3"/>'+
+   '<clipPath id="potclip"><path d="M26 54 Q26 96 64 96 Q102 96 102 54 Z"/></clipPath>'+
+   '<g clip-path="url(#potclip)">'+
+     '<rect class="liquid" id="liqRect" x="20" y="58" width="88" height="44" fill="#3a7a32"/>'+
+     '<g id="bubbleG"></g>'+
+   '</g>'+
+   '<ellipse cx="64" cy="52" rx="44" ry="11" fill="none" stroke="#0f0b06" stroke-width="4"/>'+
+   '<ellipse cx="64" cy="52" rx="40" ry="8" fill="#1a140d"/>'+
+   '<rect x="14" y="48" width="14" height="9" rx="3" fill="#3a2616" stroke="#0f0b06" stroke-width="2"/>'+
+   '<rect x="100" y="48" width="14" height="9" rx="3" fill="#3a2616" stroke="#0f0b06" stroke-width="2"/>'+
+  '</svg>';
+}
+
+/* ---------- FORMS ---------- */
+const FORMS=[
+  {id:'tea',nm:'Tea / Infusion',fi:'🍵'},
+  {id:'decoct',nm:'Decoction',fi:'🫖'},
+  {id:'tinct',nm:'Tincture',fi:'🧪'},
+  {id:'salve',nm:'Salve / Topical',fi:'🧴'},
+  {id:'cap',nm:'Capsule',fi:'💊'},
+  {id:'oil',nm:'Essential Oil',fi:'🌸'}
+];
+const RAR={common:{c:'var(--ap-com)',l:'COMMON'},rare:{c:'var(--ap-rare)',l:'RARE'},legendary:{c:'var(--ap-leg)',l:'LEGENDARY'},danger:{c:'var(--ap-danger)',l:'⚠ TOXIC'}};
+
+/* ---------- DECK (39 botanicals) ---------- */
+const DECK=[
+/* Nervine */
+ {id:'chamomile',nm:'Chamomile',lat:'Matricaria chamomilla',emoji:'🌸',rar:'common',z:'nervine',action:'Calming · carminative · mild sedative',use:'Anxiety, insomnia, GI upset, colic.',warn:'Ragweed cross-allergy. Mild additive effect with anticoagulants and sedatives.',prep:'Classic infusion (tea); flowers steep in hot water.',forms:['tea','tinct'],drug:'Apigenin (GABA-A / benzodiazepine site)',bridge:'Its flavonoid apigenin binds the same GABA-A site as benzodiazepines — a gentle echo of Valium.'},
+ {id:'valerian',nm:'Valerian',lat:'Valeriana officinalis',emoji:'🪴',rar:'rare',z:'nervine',action:'Sedative · hypnotic · anxiolytic',use:'Insomnia, anxiety.',warn:'Additive CNS depression with alcohol, benzodiazepines, opioids. Avoid in pregnancy.',prep:'Tincture or capsule (rough as a tea).',forms:['tinct','cap'],drug:'Valerenic acid (GABA-A modulator)',bridge:'Valerenic acid modulates GABA-A — the same target as benzodiazepines and Z-drugs like zolpidem.'},
+ {id:'lavender',nm:'Lavender',lat:'Lavandula angustifolia',emoji:'💜',rar:'common',z:'nervine',action:'Anxiolytic · calming · topical',use:'Anxiety, restlessness, sleep.',warn:'Essential oil for topical/aromatic use — do NOT take undiluted oil internally.',prep:'Essential oil (aroma/topical) or mild tea.',forms:['oil','tea'],drug:'Silexan / linalool (anxiolytic)',bridge:'Standardized lavender oil (Silexan) is a European prescription anxiolytic, compared in trials to lorazepam.'},
+ {id:'lemonbalm',nm:'Lemon Balm',lat:'Melissa officinalis',emoji:'🍋',rar:'common',z:'nervine',action:'Calming · antiviral · carminative',use:'Anxiety, mild insomnia, cold sores (topical).',warn:'May add to sedatives; caution with thyroid medication (can affect TSH).',prep:'Tea of the fresh/dried leaf, or tincture; topical balm for herpes labialis.',forms:['tea','tinct'],drug:'Rosmarinic acid (GABA-T inhibitor)',bridge:'Rosmarinic acid raises GABA by inhibiting its breakdown — a calming nudge to the same inhibitory system as anti-anxiety drugs.'},
+ {id:'passionflower',nm:'Passionflower',lat:'Passiflora incarnata',emoji:'🌺',rar:'rare',z:'nervine',action:'Anxiolytic · sedative',use:'Anxiety, restlessness, sleep onset.',warn:'Additive CNS depression with sedatives/alcohol. Avoid in pregnancy (uterine activity).',prep:'Tea or tincture of the aerial parts.',forms:['tea','tinct'],drug:'GABA-A modulator (benzodiazepine-like)',bridge:'Its flavonoids modulate GABA-A; one trial found it calmed pre-op anxiety comparably to midazolam.'},
+ {id:'kava',nm:'Kava',lat:'Piper methysticum',emoji:'🥥',rar:'legendary',z:'nervine',action:'Anxiolytic · muscle relaxant',use:'Anxiety, stress.',warn:'⚠ HEPATOTOXICITY — severe liver injury, banned in several countries. Additive CNS depression. Not with liver disease.',prep:'Traditional water decoction of root, or tincture.',forms:['decoct','tinct'],drug:'Kavalactones (GABA + ion-channel modulators)',bridge:'Kavalactones calm via GABA-A like benzodiazepines — but their liver toxicity is why kava sits on the dangerous edge.'},
+/* Cardio */
+ {id:'hawthorn',nm:'Hawthorn',lat:'Crataegus monogyna',emoji:'❤️',rar:'rare',z:'cardio',action:'Cardiotonic · mild vasodilator',use:'Mild heart-failure support, blood pressure.',warn:'⚠ Potentiates DIGOXIN and adds to antihypertensives/nitrates — can drop BP too far.',prep:'Tea, tincture, or capsule of berries/leaf/flower.',forms:['tea','tinct','cap'],drug:'Digoxin/ACE-adjacent (cardiac flavonoids)',bridge:'Hawthorn flavonoids boost contractility and dilate vessels — overlapping digoxin and ACE-inhibitor territory.'},
+ {id:'garlic',nm:'Garlic',lat:'Allium sativum',emoji:'🧄',rar:'common',z:'cardio',action:'Cardiovascular support · antimicrobial',use:'Mild BP/cholesterol support, antimicrobial.',warn:'Antiplatelet — additive bleeding with anticoagulants; stop before surgery. Induces CYP enzymes.',prep:'Fresh (allicin) or aged capsule.',forms:['cap','decoct'],drug:'Allicin (antiplatelet, aspirin-lite)',bridge:'Allicin inhibits platelet aggregation — a milder cousin of aspirin, which is why it stacks with blood thinners.'},
+ {id:'ginkgo',nm:'Ginkgo',lat:'Ginkgo biloba',emoji:'🍃',rar:'rare',z:'cardio',action:'Circulatory · cognitive support',use:'Memory/cognition, peripheral circulation.',warn:'⚠ Significant bleeding risk — antiplatelet (PAF antagonist); dangerous with anticoagulants and before surgery. May lower seizure threshold.',prep:'Standardized leaf extract capsule or tincture.',forms:['cap','tinct'],drug:'Antiplatelet (PAF antagonist)',bridge:'Ginkgolides block platelet-activating factor — an antiplatelet action that stacks dangerously with aspirin and warfarin.'},
+ {id:'cayenne',nm:'Cayenne',lat:'Capsicum annuum',emoji:'🌶️',rar:'common',z:'cardio',action:'Circulatory · topical analgesic · warming',use:'Circulation, topical joint/nerve pain.',warn:'Burns mucous membranes and eyes. GI irritation orally. Adds to bleeding risk in high amounts.',prep:'Capsaicin salve/topical, or capsule.',forms:['salve','cap'],drug:'Capsaicin (TRPV1 agonist — Qutenza patch)',bridge:'Capsaicin overstimulates then desensitizes TRPV1 pain receptors — the exact mechanism of the Qutenza 8% patch.'},
+ {id:'motherwort',nm:'Motherwort',lat:'Leonurus cardiaca',emoji:'🌿',rar:'rare',z:'cardio',action:'Cardiac calmative · mild sedative',use:'Palpitations from anxiety, mild hypertension.',warn:'May add to anticoagulants and sedatives; avoid in pregnancy (uterine stimulant).',prep:'Tincture or tea of the aerial parts.',forms:['tinct','tea'],drug:'Leonurine (mild beta-blocker-like)',bridge:'Leonurine calms a racing, anxious heart — a botanical nod to how beta-blockers blunt adrenaline-driven palpitations.'},
+/* Gut & Bile */
+ {id:'ginger',nm:'Ginger',lat:'Zingiber officinale',emoji:'🫚',rar:'common',z:'gut',action:'Antiemetic · anti-inflammatory · carminative',use:'Nausea (incl. pregnancy & motion), indigestion.',warn:'High doses may add to bleeding risk with anticoagulants. Safe in pregnancy at low doses.',prep:'Fresh decoction/tea, or capsule of dried root.',forms:['decoct','tea','cap'],drug:'Ondansetron-adjacent (5-HT3 pathway)',bridge:'Gingerols dampen gut 5-HT3 serotonin signaling — the same antiemetic pathway blocked by ondansetron (Zofran).'},
+ {id:'peppermint',nm:'Peppermint',lat:'Mentha × piperita',emoji:'🌱',rar:'common',z:'gut',action:'Antispasmodic · carminative · topical analgesic',use:'IBS, nausea, tension headache (topical menthol).',warn:'Worsens GERD/reflux (relaxes the LES). Do NOT apply oil near infants (laryngospasm).',prep:'Tea for gut; diluted essential oil topically for headache.',forms:['tea','oil'],drug:'Menthol (TRPM8 cold-receptor agonist)',bridge:'Menthol activates TRPM8 — the same cold-sensing receptor behind Icy Hot and modern topical analgesics.'},
+ {id:'licorice',nm:'Licorice Root',lat:'Glycyrrhiza glabra',emoji:'🟤',rar:'rare',z:'gut',action:'Demulcent · anti-inflammatory · expectorant',use:'Sore throat, cough, GERD/ulcer soothing.',warn:'⚠ Glycyrrhizin causes pseudoaldosteronism — RAISES blood pressure, drops potassium. Worsens hypertension; hypokalemia can trigger DIGOXIN toxicity. Avoid in pregnancy.',prep:'Decoction, tea, or capsule (DGL avoids the BP effect).',forms:['decoct','tea','cap'],drug:'Mineralocorticoid mimic (cortisol-sparing)',bridge:'Glycyrrhizin blocks cortisol breakdown, so cortisol floods aldosterone receptors — a built-in mineralocorticoid that spikes BP and dumps potassium.'},
+ {id:'slipperyelm',nm:'Slippery Elm',lat:'Ulmus rubra',emoji:'🪵',rar:'common',z:'gut',action:'Demulcent · soothing',use:'Sore throat, dry cough, GI irritation/reflux.',warn:'Very safe. Its mucilage can SLOW absorption of other drugs — take medicines an hour apart.',prep:'Tea/gruel of the inner bark, or capsule.',forms:['tea','cap'],drug:'Mucilage demulcent (like sucralfate)',bridge:'Its mucilage films over irritated mucosa — the demulcent principle behind throat lozenges and the ulcer drug sucralfate.'},
+ {id:'marshmallow',nm:'Marshmallow Root',lat:'Althaea officinalis',emoji:'🌾',rar:'common',z:'gut',action:'Demulcent · soothing',use:'Dry cough, sore throat, GI/urinary irritation.',warn:'Generally very safe. Mucilage may delay absorption of co-taken drugs — separate by an hour.',prep:'Cold infusion or decoction of the root.',forms:['decoct','tea'],drug:'Mucilage demulcent',bridge:'Marshmallow is the original "marshmallow" — its mucilage soothes mucosa the same way modern demulcent cough syrups do.'},
+ {id:'milkthistle',nm:'Milk Thistle',lat:'Silybum marianum',emoji:'🌿',rar:'rare',z:'gut',action:'Hepatoprotective · antioxidant',use:'Liver support, toxin/alcohol-related liver stress.',warn:'Asteraceae/ragweed cross-allergy. May alter liver enzymes and drug levels. Mild laxative effect.',prep:'Standardized silymarin capsule or tincture (seeds).',forms:['cap','tinct'],drug:'Silibinin (antidote for Amanita poisoning)',bridge:'Its active silibinin is given IV in Europe as an antidote for death-cap mushroom (Amanita) liver poisoning.'},
+ {id:'fennel',nm:'Fennel',lat:'Foeniculum vulgare',emoji:'🌱',rar:'common',z:'gut',action:'Carminative · antispasmodic',use:'Bloating, gas, infant colic, indigestion.',warn:'Mild estrogenic activity — caution with hormone-sensitive conditions and in pregnancy at high doses.',prep:'Tea/infusion of crushed seeds.',forms:['tea','decoct'],drug:'Anethole (antispasmodic)',bridge:'Anethole relaxes gut smooth muscle — the same calming-the-cramp goal as antispasmodics like dicyclomine.'},
+ {id:'senna',nm:'Senna',lat:'Senna alexandrina',emoji:'🍂',rar:'common',z:'gut',action:'Stimulant laxative',use:'Short-term constipation.',warn:'Cramping, electrolyte (potassium) loss; not for long-term use; avoid in pregnancy and bowel obstruction.',prep:'Tea or capsule of the leaf/pod.',forms:['tea','cap'],drug:'Sennosides (OTC Senokot)',bridge:'Senna IS the drug — its sennosides are the active ingredient in Senokot, straight from the plant to the pharmacy shelf.'},
+/* Immuno */
+ {id:'echinacea',nm:'Echinacea',lat:'Echinacea purpurea',emoji:'🌺',rar:'common',z:'immuno',action:'Immune support',use:'Early upper-respiratory infection, immune support.',warn:'Caution in autoimmune disease (immunostimulant). Asteraceae allergy. Atopy/asthma reactions.',prep:'Tincture (root) or tea (aerial parts).',forms:['tinct','tea'],drug:'Alkylamides (CB2 immune modulators)',bridge:'Its alkylamides engage cannabinoid (CB2) receptors on immune cells — an emerging immunomodulatory target.'},
+ {id:'elderberry',nm:'Elderberry',lat:'Sambucus nigra',emoji:'🫐',rar:'common',z:'immuno',action:'Antiviral · immune support',use:'Early cold and flu symptoms.',warn:'RAW berries/leaves/bark are toxic (cyanogenic) — must be cooked. Caution in autoimmune disease.',prep:'Cooked decoction (syrup) or tincture of ripe berries.',forms:['decoct','tinct'],drug:'Anthocyanins (viral entry blockers)',bridge:'Elderberry anthocyanins appear to block viral hemagglutinin from entering cells — a natural echo of antiviral entry-inhibitors.'},
+ {id:'astragalus',nm:'Astragalus',lat:'Astragalus membranaceus',emoji:'🌱',rar:'rare',z:'immuno',action:'Adaptogen · immune tonic',use:'Long-term immune support, fatigue, convalescence.',warn:'Immunostimulant — caution in autoimmune disease and with immunosuppressant drugs (transplant). Not in acute fever.',prep:'Decoction of the root (classic in soups), or capsule.',forms:['decoct','cap'],drug:'Polysaccharides (immune potentiators)',bridge:'Its polysaccharides prime immune cells — the opposite pole from the immunosuppressants it dangerously counteracts in transplant patients.'},
+ {id:'goldenseal',nm:'Goldenseal',lat:'Hydrastis canadensis',emoji:'🟡',rar:'rare',z:'immuno',action:'Antimicrobial · mucous-membrane astringent',use:'Mucosal infections, sinus/GI support.',warn:'⚠ Berberine inhibits CYP3A4 / P-gp — alters many drug levels. Avoid in pregnancy (can cause kernicterus in newborns).',prep:'Tincture or capsule of the root.',forms:['tinct','cap'],drug:'Berberine (AMPK activator / antimicrobial)',bridge:'Its berberine activates AMPK and fights microbes — now studied for blood-sugar control like metformin.'},
+ {id:'ginseng',nm:'Asian Ginseng',lat:'Panax ginseng',emoji:'🌱',rar:'rare',z:'immuno',action:'Adaptogen · stimulant · glucose-lowering',use:'Fatigue, stress resilience, energy.',warn:'Lowers blood glucose — additive with diabetes meds (hypoglycemia). Anticoagulant interaction. Insomnia/agitation; can raise BP.',prep:'Decoction of root, capsule, or tincture.',forms:['decoct','cap','tinct'],drug:'Ginsenosides (multi-target adaptogen)',bridge:'Its ginsenosides nudge the HPA stress axis and lower blood glucose — which is why it can stack with metformin into hypoglycemia.'},
+/* Topical / pain */
+ {id:'aloe',nm:'Aloe Vera',lat:'Aloe barbadensis',emoji:'🪴',rar:'common',z:'topical',action:'Topical wound-healing · demulcent',use:'Burns, sunburn, minor wounds, skin irritation.',warn:'Topical gel is gentle. The yellow LATEX taken orally is a harsh stimulant laxative; avoid in pregnancy.',prep:'Fresh gel as a salve/topical.',forms:['salve'],drug:'Sennoside-class laxative (from the latex)',bridge:'The gel soothes burns, but the latex carries anthraquinones in senna\'s laxative family — two opposite drugs in one plant.'},
+ {id:'calendula',nm:'Calendula',lat:'Calendula officinalis',emoji:'🌼',rar:'common',z:'topical',action:'Vulnerary · anti-inflammatory (topical)',use:'Minor wounds, abrasions, diaper rash, inflamed skin.',warn:'Asteraceae cross-allergy. Topical use; avoid internal in pregnancy.',prep:'Infused-oil salve or wash of the flowers.',forms:['salve'],drug:'Triterpenoid wound-healers',bridge:'Calendula\'s triterpenoids speed granulation and re-epithelialization — the natural ancestor of modern wound-care ointments.'},
+ {id:'arnica',nm:'Arnica',lat:'Arnica montana',emoji:'🌼',rar:'rare',z:'topical',action:'Topical anti-inflammatory · anti-bruise',use:'Bruises, sprains, muscle soreness — TOPICAL only.',warn:'⚠ Do NOT take internally or on broken skin — toxic (helenalin): GI, cardiac effects. Asteraceae allergy.',prep:'Salve/gel/cream applied to intact skin only.',forms:['salve'],drug:'Helenalin (NF-κB inhibitor)',bridge:'Helenalin blocks NF-κB inflammation topically — but the same potency makes arnica poisonous if swallowed.'},
+ {id:'comfrey',nm:'Comfrey',lat:'Symphytum officinale',emoji:'🌿',rar:'rare',z:'topical',action:'Topical tissue-healer ("knitbone")',use:'Sprains, bruises, closed fractures — short-term TOPICAL.',warn:'⚠ Pyrrolizidine alkaloids are HEPATOTOXIC — never internal, not on broken skin, not long-term, not in pregnancy.',prep:'Salve/poultice on intact skin, brief courses.',forms:['salve'],drug:'Allantoin (cell-proliferation promoter)',bridge:'Allantoin (now in many lotions) drives its tissue repair — yet comfrey\'s pyrrolizidine alkaloids make internal use a liver hazard.'},
+ {id:'willow',nm:'Willow Bark',lat:'Salix alba',emoji:'🌿',rar:'rare',z:'topical',action:'Analgesic · anti-inflammatory · antipyretic',use:'Pain, headache, fever, joint inflammation.',warn:'Salicylate content. AVOID with anticoagulants (additive bleeding), peptic ulcer, aspirin allergy, and in children (Reye risk).',prep:'Best as a decoction or tincture.',forms:['decoct','tinct'],drug:'Aspirin (acetylsalicylic acid)',bridge:'Willow gave us salicin → salicylic acid; Bayer modified it into aspirin in 1899. Same mechanism, same bleeding risk.'},
+ {id:'turmeric',nm:'Turmeric',lat:'Curcuma longa',emoji:'🟡',rar:'rare',z:'topical',action:'Anti-inflammatory · antioxidant',use:'Joint pain, inflammation.',warn:'Adds to bleeding risk with anticoagulants. Avoid with gallstones. Poor absorption without black pepper (piperine).',prep:'Decoction or capsule, paired with black pepper.',forms:['decoct','cap'],drug:'Curcumin (COX-2 / NF-κB modulator)',bridge:'Curcumin downregulates COX-2 and NF-κB — overlapping NSAIDs\' anti-inflammatory pathway, with the same bleeding caution.'},
+ {id:'feverfew',nm:'Feverfew',lat:'Tanacetum parthenium',emoji:'🌼',rar:'rare',z:'topical',action:'Migraine prophylaxis · anti-inflammatory',use:'Preventing migraines (not acute attacks).',warn:'Asteraceae/ragweed cross-allergy. Anticoagulant interaction. Avoid in pregnancy.',prep:'Dried leaf in capsule, or tincture.',forms:['cap','tinct'],drug:'Parthenolide (NF-κB inhibitor)',bridge:'Its parthenolide blocks NF-κB inflammatory signaling — now studied as an anti-cancer lead compound.'},
+/* Toxic Vault */
+ {id:'foxglove',nm:'Foxglove',lat:'Digitalis purpurea',emoji:'🔔',rar:'danger',z:'toxic',action:'Cardiotonic (increases contractility)',use:'Historically heart failure — NOT safe to compound by hand.',warn:'⚠⚠ EXTREMELY NARROW THERAPEUTIC INDEX. Nausea, visual halos, lethal arrhythmias. A single misjudged dose can kill.',prep:'NONE safe outside pharmaceutical standardization.',forms:[],drug:'Digoxin (Na+/K+-ATPase inhibitor)',bridge:'Foxglove gave us digoxin. It strengthens the heartbeat by poisoning the Na+/K+ pump — which is also how it kills.'},
+ {id:'belladonna',nm:'Belladonna',lat:'Atropa belladonna',emoji:'🟣',rar:'danger',z:'toxic',action:'Anticholinergic ("deadly nightshade")',use:'Historically antispasmodic/mydriatic — not for compounding.',warn:'⚠⚠ Tropane alkaloids: "hot, blind, dry, red, mad." Tachycardia, delirium, death. A few berries kill a child.',prep:'NONE safe by hand.',forms:[],drug:'Atropine (muscarinic antagonist)',bridge:'Belladonna gave us atropine — still used to speed a slow heart and dry secretions, yet a poison that dilates the pupils of the "beautiful lady."'},
+ {id:'hemlock',nm:'Poison Hemlock',lat:'Conium maculatum',emoji:'☠️',rar:'danger',z:'toxic',action:'Neurotoxin (no therapeutic use)',use:'None — historic execution poison (Socrates).',warn:'⚠⚠ Coniine causes ascending paralysis and respiratory arrest while the mind stays clear. No safe dose.',prep:'NONE. Never dispense.',forms:[],drug:'Coniine (nicotinic blocker — curare-like)',bridge:'Coniine blocks nicotinic receptors like curare — paralyzing the diaphragm, the same target anesthesiologists use deliberately with monitored ventilation.'},
+ {id:'wormwood',nm:'Wormwood',lat:'Artemisia absinthium',emoji:'🍸',rar:'danger',z:'toxic',action:'Bitter digestive · antiparasitic (historic)',use:'Tiny bitter doses historically; the bitter of absinthe.',warn:'⚠ Thujone is neurotoxic — seizures, hallucinations at high/prolonged dose. Avoid in pregnancy and epilepsy.',prep:'Only minute, brief amounts; easily overdone.',forms:['tinct'],drug:'Thujone (GABA-A antagonist)',bridge:'Thujone BLOCKS GABA-A — the mirror image of valerian, which is why too much triggers seizures instead of calm.'},
+ {id:'pennyroyal',nm:'Pennyroyal',lat:'Mentha pulegium',emoji:'🌿',rar:'danger',z:'toxic',action:'(Historic abortifacient — dangerous)',use:'None safe — folk uses are lethal.',warn:'⚠⚠ Pulegone causes fatal liver necrosis; the essential oil has killed. Never internal, never in pregnancy.',prep:'NONE safe. Do not dispense the oil.',forms:[],drug:'Pulegone (hepatotoxic metabolite)',bridge:'Pulegone is bioactivated by the liver into a toxin that destroys hepatocytes — the same way acetaminophen overdose kills, but with no antidote margin.'}
+];
+const byId=id=>DECK.find(d=>d.id===id);
+
+/* ---------- ZONES ---------- */
+const ZONES=[
+ {id:'nervine',name:'Nervine Glade',sub:'Calm · Sleep · Anxiety',emoji:'🌙',color:'#9b8cff',rgb:'155,140,255',weather:'spores',x:16,y:24,seed:7,
+  body:'#5a4aa8',accent:'#b39cff',eye:'#e0ffe6',
+  boss:{name:'The Insomnia Shade',taunt:'You will not rest until I do…'},
+  cases:[
+   {av:'🧓',who:'Walter · 61 · trouble sleeping',complaint:'"I can\'t fall asleep lately. Mind won\'t quiet down. No prescriptions."',flags:[{t:'No sedatives / alcohol',c:'note'}],good:['valerian'],goodForms:['tinct','cap'],alt:['chamomile','lavender','passionflower','lemonbalm'],altForms:['tea','oil','tinct'],trapIds:[],reward:30,teach:'Valerian (valerenic acid → GABA-A) is the strongest botanical hypnotic; chamomile, passionflower, lemon balm or lavender are gentler picks. All touch the same inhibitory pathway as benzodiazepines.'},
+   {av:'😟',who:'Nina · 27 · pre-exam anxiety',complaint:'"My heart races before exams and I feel panicky. I want something calming but not knock-me-out. Healthy."',flags:[{t:'No current meds',c:'note'}],good:['passionflower','lemonbalm','chamomile'],goodForms:['tea','tinct'],alt:['lavender'],altForms:['oil','tea'],trapIds:[],reward:35,teach:'Passionflower has calmed pre-procedure anxiety comparably to midazolam in studies; lemon balm and chamomile are gentle daytime anxiolytics that won\'t sedate her for the exam.'},
+   {av:'🤰',who:'Priya · 28 · 9 weeks pregnant, anxious',complaint:'"Pregnancy has me anxious and sleepless. I want something natural that\'s safe for the baby."',flags:[{t:'PREGNANT',c:'preg'}],good:['lemonbalm','chamomile'],goodForms:['tea'],alt:[],altForms:[],trapIds:['valerian','passionflower','kava'],reward:45,hardTrap:true,teach:'⚠ In pregnancy, valerian and passionflower lack safety data (and passionflower may stimulate the uterus), and kava is hepatotoxic. Gentle lemon balm or chamomile tea is the conservative calming choice.'},
+   {av:'🍷',who:'Greg · 50 · stressed, drinks nightly',complaint:'"Work stress is crushing me. I unwind with a few whiskeys but still feel wired. Give me something strong and natural."',flags:[{t:'Heavy alcohol use',c:'med'}],good:['lemonbalm','chamomile'],goodForms:['tea','tinct'],alt:['lavender'],altForms:['oil'],trapIds:['kava','valerian'],reward:45,hardTrap:true,teach:'⚠ Kava plus alcohol is a double liver hit (and kava is hepatotoxic on its own); valerian adds to alcohol\'s CNS depression. Choose gentle lemon balm/chamomile and address the drinking — never stack sedatives on alcohol.'},
+   {av:'😣',who:'Dana · 38 · tension + insomnia',complaint:'"I\'m wound tight and can\'t sleep. No meds, healthy liver, willing to try anything natural that works well."',flags:[{t:'Healthy · no meds',c:'note'}],good:['kava','valerian'],goodForms:['tinct','decoct','cap'],alt:['passionflower'],altForms:['tea','tinct'],trapIds:[],reward:40,teach:'With a healthy liver and no alcohol or other sedatives, kava (kavalactones → GABA-A) is genuinely effective for anxiety; valerian is the reliable sleep choice. Context is everything — the SAME kava was the wrong call for Greg.'}
+  ]},
+ {id:'cardio',name:'Cardio Hollow',sub:'Heart · Blood · Vessels',emoji:'🫀',color:'#ff6b5e',rgb:'255,107,94',weather:'embers',x:50,y:16,seed:13,
+  body:'#8a2230',accent:'#ff5a4d',eye:'#ffd24d',
+  boss:{name:'The Clotbound Wraith',taunt:'Every vessel I touch runs thick…'},
+  cases:[
+   {av:'🧔',who:'Ed · 58 · on warfarin, joint pain',complaint:'"My knees ache from arthritis. I\'m on warfarin for my heart. Give me something strong and natural for inflammation."',flags:[{t:'ON WARFARIN',c:'med'}],good:['motherwort'],goodForms:['tinct','tea'],alt:[],altForms:[],trapIds:['willow','turmeric','ginger','garlic','ginkgo'],reward:50,hardTrap:true,teach:'⚠ The anticoagulant web. Willow (salicylates), turmeric, ginger, garlic and ginkgo (antiplatelet) ALL add to warfarin\'s bleeding risk. "Natural anti-inflammatory" almost always means "additive bleeding on a thinner" — caution wins.'},
+   {av:'🧓',who:'Hal · 70 · on digoxin, stressed',complaint:'"My heart pills are digoxin. I\'m stressed and palpitating. Something strong and natural to settle me?"',flags:[{t:'ON DIGOXIN',c:'med'}],good:['motherwort'],goodForms:['tinct','tea'],alt:[],altForms:[],trapIds:['hawthorn','licorice'],reward:50,hardTrap:true,teach:'⚠ Digoxin has a razor-thin window. Hawthorn potentiates it directly and licorice drops potassium (hypokalemia → digoxin toxicity). Gentle motherwort for anxious palpitations plus a prescriber check is the safe play.'},
+   {av:'👩',who:'Carol · 55 · mild high blood pressure',complaint:'"My blood pressure is borderline high. My doctor said lifestyle first, no meds yet. Anything gentle and natural?"',flags:[{t:'No current meds',c:'note'}],good:['hawthorn','garlic'],goodForms:['tea','tinct','cap'],alt:['motherwort'],altForms:['tinct','tea'],trapIds:[],reward:35,teach:'Hawthorn (cardiac flavonoids) and garlic gently support blood pressure and vessels when she\'s on no interacting meds. Both would be risky alongside digoxin or anticoagulants — appropriate here precisely because she takes neither.'},
+   {av:'🧑',who:'Sam · 42 · poor circulation, no meds',complaint:'"My hands and feet are always cold and my memory feels foggy. I take nothing. Want something for circulation."',flags:[{t:'No anticoagulants',c:'note'}],good:['ginkgo'],goodForms:['cap','tinct'],alt:['cayenne'],altForms:['cap','salve'],trapIds:[],reward:40,teach:'Ginkgo (and warming cayenne) support peripheral circulation — appropriate BECAUSE Sam is on no blood thinners. Ginkgo\'s antiplatelet action would be dangerous for anyone on warfarin or aspirin.'}
+  ]},
+ {id:'gut',name:'Gut & Bile Marsh',sub:'Digestion · Liver · GI',emoji:'🫄',color:'#e0a83c',rgb:'224,168,60',weather:'bubbles',x:84,y:30,seed:21,
+  body:'#7a5a1e',accent:'#e0a83c',eye:'#fff0b0',
+  boss:{name:'The Bilious Gorge',taunt:'I sour every stomach I crawl through…'},
+  cases:[
+   {av:'🤰',who:'Priya · 28 · pregnant, nauseous',complaint:'"Morning sickness is wrecking me. I want something natural and safe for the baby."',flags:[{t:'PREGNANT',c:'preg'}],good:['ginger'],goodForms:['tea','decoct','cap'],alt:[],altForms:[],trapIds:['senna','wormwood','licorice'],reward:45,hardTrap:true,teach:'⚠ Ginger is the evidence-backed, pregnancy-safe antiemetic (gut 5-HT3, like Zofran). Senna and licorice and wormwood are contraindicated in pregnancy. Match the remedy to the patient\'s state, not just the symptom.'},
+   {av:'🧑',who:'Tom · 41 · dry tickly cough',complaint:'"My throat is raw and I have a dry, tickly cough. Healthy, no prescriptions."',flags:[{t:'Demulcent need',c:'note'}],good:['slipperyelm','marshmallow'],goodForms:['tea','decoct'],alt:['licorice'],altForms:['decoct','tea'],trapIds:[],reward:30,teach:'Slippery elm and marshmallow are demulcents — mucilage coats and soothes raw mucosa. Licorice works too, but its blood-pressure/potassium caution rules it out for hypertensive patients.'},
+   {av:'👩‍🦰',who:'Bea · 55 · high blood pressure, heartburn',complaint:'"My heartburn is awful. My blood pressure runs high. I hear licorice is great — make me some?"',flags:[{t:'HYPERTENSION',c:'med'}],good:['slipperyelm','marshmallow'],goodForms:['tea','decoct'],alt:[],altForms:[],trapIds:['licorice'],reward:45,hardTrap:true,teach:'⚠ Licorice (glycyrrhizin) causes pseudoaldosteronism — RAISES blood pressure and drops potassium, exactly wrong for hypertension. Use a gentle demulcent like slippery elm or marshmallow, and steer her to DGL licorice if she insists.'},
+   {av:'🍻',who:'Rick · 47 · heavy drinker, liver worry',complaint:'"My doctor says my liver numbers are up from drinking. I want to protect my liver naturally."',flags:[{t:'Liver stress',c:'note'}],good:['milkthistle'],goodForms:['cap','tinct'],alt:[],altForms:[],trapIds:['kava','wormwood'],reward:45,hardTrap:true,teach:'⚠ Milk thistle (silibinin) is the hepatoprotective choice. The traps — kava and wormwood — are themselves hepatotoxic/neurotoxic, the last thing a stressed liver needs. The cure must not become the second insult.'},
+   {av:'🤱',who:'Mae · 33 · bloating & gas',complaint:'"I\'m bloated and gassy after meals. Healthy, not pregnant, no meds. Something gentle for digestion?"',flags:[{t:'Healthy · no meds',c:'note'}],good:['fennel','peppermint'],goodForms:['tea','oil'],alt:['ginger'],altForms:['tea','decoct'],trapIds:[],reward:30,teach:'Fennel (anethole) and peppermint are classic carminative antispasmodics for bloating and gas. Note peppermint would be the wrong call if she had reflux, since it relaxes the lower esophageal sphincter.'}
+  ]},
+ {id:'immuno',name:'Immuno Thicket',sub:'Immunity · Cold · Infection',emoji:'🛡️',color:'#4fd0c0',rgb:'79,208,192',weather:'sparks',x:80,y:70,seed:29,
+  body:'#1d6a6a',accent:'#4fd0c0',eye:'#e0fff6',
+  boss:{name:'The Feverfen Miasma',taunt:'Breathe me in… your defenses are mine…'},
+  cases:[
+   {av:'🤧',who:'Lena · 30 · a cold coming on',complaint:'"Scratchy throat, sniffles, I feel a cold starting today. I want to hit it early. Healthy otherwise."',flags:[{t:'No autoimmune disease',c:'note'}],good:['elderberry','echinacea'],goodForms:['decoct','tinct','tea'],alt:[],altForms:[],trapIds:[],reward:30,teach:'Elderberry (cooked — raw is cyanogenic) and echinacea are the go-to early-cold immune botanicals. Both stimulate immune activity, so both are cautioned in autoimmune disease.'},
+   {av:'🦠',who:'Owen · 44 · rheumatoid arthritis (autoimmune)',complaint:'"I keep catching colds. I have rheumatoid arthritis on methotrexate. Can you boost my immune system naturally?"',flags:[{t:'AUTOIMMUNE + immunosuppressant',c:'med'}],good:['elderberry'],goodForms:['decoct'],alt:[],altForms:[],trapIds:['echinacea','astragalus','ginseng'],reward:50,hardTrap:true,teach:'⚠ Immunostimulants (echinacea, astragalus, ginseng) can flare autoimmune disease and oppose his methotrexate. Symptom-soothing care and referral beat "boosting" an immune system that\'s already being deliberately suppressed.'},
+   {av:'🧓',who:'Frank · 64 · run-down, frequent infections',complaint:'"I feel run-down and catch every bug. Healthy otherwise, no meds, no autoimmune issues. Something to build me up?"',flags:[{t:'No autoimmune / no meds',c:'note'}],good:['astragalus','ginseng'],goodForms:['decoct','cap'],alt:['echinacea'],altForms:['tinct','tea'],trapIds:[],reward:40,teach:'Astragalus and ginseng are adaptogenic immune tonics for long-term resilience — appropriate here precisely because Frank has no autoimmune disease or immunosuppressants. The same herbs were the wrong call for Owen.'},
+   {av:'🤰',who:'Sara · 31 · pregnant, sinus congestion',complaint:'"I have a stuffy sinus infection and I\'m 20 weeks pregnant. What\'s safe and natural?"',flags:[{t:'PREGNANT',c:'preg'}],good:['elderberry'],goodForms:['decoct'],alt:[],altForms:[],trapIds:['goldenseal'],reward:45,hardTrap:true,teach:'⚠ Goldenseal (berberine) is contraindicated in pregnancy — it crosses the placenta and can cause newborn kernicterus. Cooked elderberry is a safer supportive choice; persistent infection needs a clinician.'}
+  ]},
+ {id:'topical',name:'Topical Reach',sub:'Skin · Pain · Muscle',emoji:'🩹',color:'#ff9a3c',rgb:'255,154,60',weather:'haze',x:46,y:78,seed:37,
+  body:'#a8521e',accent:'#ff9a3c',eye:'#fff0b0',
+  boss:{name:'The Searing Rash',taunt:'I blister the skin you try to soothe…'},
+  cases:[
+   {av:'🧒',who:'Aiko · 19 · sunburned at the lake',complaint:'"I got a nasty sunburn on my shoulders. The skin is red and stinging. Anything topical?"',flags:[{t:'Topical / intact skin',c:'note'}],good:['aloe'],goodForms:['salve'],alt:['calendula'],altForms:['salve'],trapIds:[],reward:30,teach:'Aloe gel (and calendula) soothe sunburn and minor burns topically. The aloe LEAF GEL is safe on skin — never the oral latex, which is a harsh laxative.'},
+   {av:'🏈',who:'Marcus · 24 · bruised, swollen ankle',complaint:'"I rolled my ankle at football — bruised and swollen, skin\'s not broken. Something natural for the bruise and swelling?"',flags:[{t:'Intact skin only',c:'note'}],good:['arnica'],goodForms:['salve'],alt:['comfrey'],altForms:['salve'],trapIds:[],reward:40,teach:'Arnica (and comfrey) topically reduce bruising and swelling on INTACT skin. The catch — both are toxic if taken internally or used on broken skin, so application site is the whole lesson.'},
+   {av:'🩸',who:'Dev · 29 · open scraped knee',complaint:'"I scraped my knee raw — it\'s an open wound. I heard arnica is great for injuries. Put some on?"',flags:[{t:'OPEN WOUND',c:'med'}],good:['calendula'],goodForms:['salve'],alt:['aloe'],altForms:['salve'],trapIds:['arnica','comfrey'],reward:50,hardTrap:true,teach:'⚠ Arnica and comfrey must NEVER touch broken skin — absorption of helenalin / pyrrolizidine alkaloids turns them toxic. On an open wound, calendula is the vulnerary of choice; "great for injuries" doesn\'t mean "safe on every injury."'},
+   {av:'🤕',who:'Lila · 36 · recurring migraines',complaint:'"I get migraines a few times a month. I want to prevent them naturally. Healthy, not pregnant, no blood thinners."',flags:[{t:'No anticoagulants / not pregnant',c:'note'}],good:['feverfew'],goodForms:['cap','tinct'],alt:['peppermint'],altForms:['oil'],trapIds:[],reward:40,teach:'Feverfew (parthenolide) is the classic migraine PROPHYLACTIC (not for acute attacks); topical peppermint oil can ease an acute tension component. Feverfew would be off-limits in pregnancy or with anticoagulants — fine for Lila.'}
+  ]},
+ {id:'toxic',name:'The Toxic Vault',sub:'Final · Know What NOT to Give',emoji:'☠️',color:'#b06cff',rgb:'176,108,255',weather:'omen',x:16,y:70,seed:47,
+  body:'#3a1d52',accent:'#b06cff',eye:'#9bff6c',
+  boss:{name:'The Nightshade Sovereign',taunt:'Six wilds fed me. Now taste my cabinet of poisons…'},
+  cases:[
+   {av:'😵',who:'A frantic mother · child ate berries',complaint:'"My child ate shiny black berries off a tall plant — now she\'s flushed, hot, and seeing things. SOMEONE said belladonna helps. Make a remedy!"',flags:[{t:'EMERGENCY · poisoning',c:'med'}],good:[],goodForms:[],alt:[],altForms:[],refuseId:'belladonna',answerIsRefuse:true,trapIds:['belladonna','foxglove','hemlock','pennyroyal'],reward:55,hardTrap:true,teach:'⚠ This is belladonna poisoning ("hot, blind, dry, red, mad"). You do NOT compound the very poison — or any toxic plant. The right move is REFUSE TO DISPENSE and send her to emergency care. Belladonna\'s antidote (physostigmine) is a hospital drug, not a shelf remedy.'},
+   {av:'🧪',who:'A "natural healer" · wants a heart tonic',complaint:'"I treat heart patients. Brew me a strong foxglove tincture — it\'s natural digitalis, surely safe in skilled hands."',flags:[{t:'Lethal narrow index',c:'med'}],good:[],goodForms:[],alt:[],altForms:[],answerIsRefuse:true,refuseId:'foxglove',trapIds:['foxglove'],reward:55,hardTrap:true,teach:'⚠ Foxglove → digoxin has a therapeutic window so narrow that only standardized, blood-level-monitored pharmaceuticals are safe. A hand-brewed tincture has no dosing control — REFUSE. "Natural" is not "controllable."'},
+   {av:'🤫',who:'A desperate woman · 8 weeks pregnant',complaint:'"I can\'t be pregnant right now. I heard pennyroyal oil will take care of it. Just sell me the oil."',flags:[{t:'PREGNANT · self-harm risk',c:'preg'}],good:[],goodForms:[],alt:[],altForms:[],answerIsRefuse:true,refuseId:'pennyroyal',trapIds:['pennyroyal','wormwood'],reward:55,hardTrap:true,teach:'⚠ Pennyroyal oil (pulegone) causes fatal liver necrosis and has killed women attempting this. You REFUSE to dispense it, express care, and connect her with real medical and counseling support — never the poison.'},
+   {av:'🧙',who:'An alchemist · wants "the bitter green"',complaint:'"Give me a hearty daily wormwood tincture — the bitter green of absinthe. I drink a glass every morning."',flags:[{t:'Neurotoxic at dose',c:'med'}],good:[],goodForms:[],alt:[],altForms:[],answerIsRefuse:true,refuseId:'wormwood',trapIds:['wormwood','hemlock'],reward:55,hardTrap:true,teach:'⚠ Daily/strong wormwood means thujone accumulation — a GABA-A antagonist that triggers seizures and hallucinations. Tiny culinary bitters are one thing; a "hearty daily glass" is a neurotoxic dose. REFUSE and educate.'}
+  ]}
+];
+const getZone=id=>ZONES.find(z=>z.id===id);
+
+/* ---------- STATE ---------- */
+let S={coin:0, mastered:new Set(), cleared:new Set(), owned:new Set(),
+        achv:new Set(), srBox:{},
+        zone:null, caseIdx:0, hearts:3, form:null, bench:[], bossMax:0, bossHP:0, frenzied:false};
+function load(){try{const sv=JSON.parse(localStorage.getItem('apq_full_v1')||'{}');
+  if(sv.coin!=null){S.coin=sv.coin;S.mastered=new Set(sv.mastered||[]);S.cleared=new Set(sv.cleared||[]);S.owned=new Set(sv.owned||[]);S.achv=new Set(sv.achv||[]);S.srBox=sv.srBox||{};}}catch(e){}}
+function save(){try{localStorage.setItem('apq_full_v1',JSON.stringify({coin:S.coin,mastered:[...S.mastered],cleared:[...S.cleared],owned:[...S.owned],achv:[...S.achv],srBox:S.srBox}));}catch(e){}}
+load();
+
+/* ============================================================
+   AUDIO (procedural Web Audio)
+   ============================================================ */
+let AC=null;
+function ac(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} return AC; }
+function tone(freq,dur,type,vol,whenOff){
+  const c=ac(); if(!c)return; const t=c.currentTime+(whenOff||0);
+  const o=c.createOscillator(),g=c.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.15,t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+0.05);
+}
+function sfx(name){
+  if(name==='correct'){[523,659,784,1046].forEach((f,i)=>tone(f,0.5,'triangle',0.12,i*0.08));}
+  else if(name==='wrong'){tone(140,0.4,'sawtooth',0.16);tone(90,0.5,'sawtooth',0.12,0.05);}
+  else if(name==='hurt'){tone(70,0.5,'sawtooth',0.2);}
+  else if(name==='shatter'){const c=ac();if(c){const b=c.createBuffer(1,c.sampleRate*0.6,c.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const s=c.createBufferSource();s.buffer=b;const g=c.createGain();g.gain.value=0.25;s.connect(g).connect(c.destination);s.start();}tone(180,0.6,'square',0.1);}
+  else if(name==='coin'){tone(880,0.12,'square',0.12);tone(1320,0.14,'square',0.1,0.06);}
+  else if(name==='brew'){tone(220,0.18,'sine',0.08);tone(330,0.2,'sine',0.06,0.1);}
+  else if(name==='click'){tone(440,0.06,'square',0.06);}
+  else if(name==='victory'){[392,523,659,784,1046,1318].forEach((f,i)=>tone(f,0.6,'triangle',0.13,i*0.1));}
+  else if(name==='achv'){[659,988,1318].forEach((f,i)=>tone(f,0.4,'sine',0.12,i*0.07));}
+}
+
+/* ============================================================
+   FX CANVAS — particle engine
+   ============================================================ */
+const fxCv=document.getElementById('fxCanvas'),fx=fxCv.getContext('2d');
+let parts=[],fxRunning=false;
+function fxResize(){fxCv.width=innerWidth;fxCv.height=innerHeight;}
+fxResize();addEventListener('resize',fxResize);
+function fxLoop(){
+  fx.clearRect(0,0,fxCv.width,fxCv.height);
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];p.vy+=p.g||0;p.x+=p.vx;p.y+=p.vy;p.life--;p.vx*=0.99;
+    const a=Math.max(0,p.life/p.max);
+    fx.globalAlpha=a;
+    if(p.shape==='rect'){fx.fillStyle=p.c;fx.fillRect(p.x,p.y,p.s,p.s);}
+    else if(p.shape==='text'){fx.font=p.s+'px serif';fx.fillText(p.t,p.x,p.y);}
+    else{fx.fillStyle=p.c;fx.beginPath();fx.arc(p.x,p.y,p.s,0,7);fx.fill();}
+    if(p.life<=0)parts.splice(i,1);
+  }
+  fx.globalAlpha=1;
+  if(parts.length>0)requestAnimationFrame(fxLoop);else fxRunning=false;
+}
+function fxStart(){if(!fxRunning){fxRunning=true;requestAnimationFrame(fxLoop);}}
+function burst(x,y,opts){
+  const n=opts.n||20,col=opts.colors||['#ffd700','#ff6cb6','#5ec8ff'];
+  for(let i=0;i<n;i++){const ang=Math.random()*Math.PI*2,sp=(opts.speed||4)*(0.4+Math.random());
+    parts.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-(opts.up||0),g:opts.g==null?0.12:opts.g,
+      life:opts.life||50,max:opts.life||50,s:opts.size||(2+Math.random()*4),c:col[i%col.length],shape:opts.shape||'circle',t:opts.t});}
+  fxStart();
+}
+function coinShower(){
+  for(let i=0;i<26;i++)parts.push({x:Math.random()*fxCv.width,y:-20-Math.random()*200,vx:(Math.random()-0.5)*1.5,vy:2+Math.random()*3,g:0.05,
+    life:120,max:120,s:18,c:'#ffd700',shape:'text',t:'🪙'});
+  fxStart();sfx('coin');
+}
+function projectile(fromX,fromY,toX,toY,glyph,col){
+  const steps=18;let i=0;
+  (function fly(){ if(i>steps){burst(toX,toY,{n:14,colors:[col,'#fff'],speed:5,life:36,size:4});sfx('hurt');return;}
+    const t=i/steps,x=fromX+(toX-fromX)*t,y=fromY+(toY-fromY)*t-Math.sin(t*Math.PI)*40;
+    parts.push({x,y,vx:0,vy:0,g:0,life:10,max:10,s:24,c:col,shape:'text',t:glyph});fxStart();i++;requestAnimationFrame(fly);})();
+}
+
+/* ============================================================
+   TITLE FX
+   ============================================================ */
+function initSparkles(){
+  const cv=document.getElementById('sparkCv');if(!cv)return;const ctx=cv.getContext('2d');let W,H,ps=[];
+  function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;}rs();addEventListener('resize',rs);
+  for(let i=0;i<60;i++)ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.4,s:Math.random()*.4+.1,t:Math.random()*6});
+  (function loop(){ if(!document.getElementById('titleScreen').classList.contains('active'))return;
+    ctx.clearRect(0,0,W,H);for(const p of ps){p.y-=p.s;p.t+=.05;if(p.y<-5){p.y=H+5;p.x=Math.random()*W;}
+      const a=(Math.sin(p.t)*.5+.5)*.8;ctx.fillStyle='rgba(255,'+(220+Math.floor(Math.sin(p.t)*30))+',120,'+a+')';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}requestAnimationFrame(loop);})();
+}
+function initFloatHerbs(hostId){
+  const host=document.getElementById(hostId);if(!host)return;host.innerHTML='';
+  const herbs=['🌿','🌼','🍃','🌸','🪴','🧪','⚗️','💊','🍵','🌱','💜','🫚','🌺','🔬','🍶','🟡'];
+  for(let i=0;i<16;i++){const s=document.createElement('span');s.className='fh';s.textContent=herbs[i%herbs.length];
+    s.style.left=(Math.random()*98)+'%';s.style.fontSize=(18+Math.random()*24)+'px';
+    const dur=11+Math.random()*13;s.style.animationDuration=dur+'s';s.style.animationDelay=(-Math.random()*dur)+'s';host.appendChild(s);}
+}
+
+/* ============================================================
+   PASSWORD GATE
+   ============================================================ */
+const APQ_PASSWORD='garg';
+function tryUnlock(){
+  const v=(document.getElementById('pw').value||'').trim().toLowerCase();
+  if(v===APQ_PASSWORD){ sfx('correct'); const g=document.getElementById('gate');
+    g.style.transition='opacity .55s ease';g.style.opacity='0';setTimeout(()=>{g.style.display='none';},560);
+    showScreen('titleScreen');initSparkles();
+  } else { document.getElementById('pwErr').textContent='✗ Wrong word. Try again.'; const pw=document.getElementById('pw');pw.value='';pw.focus(); }
+}
+
+/* ============================================================
+   SCREEN ROUTER
+   ============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function gotoTitle(){showScreen('titleScreen');initSparkles();}
+function gotoMap(){sfx('click');showScreen('mapScreen');renderMap();}
+
+/* ============================================================
+   WORLD MAP
+   ============================================================ */
+function renderMap(){
+  document.getElementById('m_coins').textContent=S.coin;
+  document.getElementById('m_mastered').textContent=S.mastered.size;
+  document.getElementById('m_deck').textContent=DECK.length;
+  document.getElementById('clearedCount').textContent=S.cleared.size;
+  document.getElementById('questBar').style.width=(S.cleared.size/ZONES.length*100)+'%';
+  const board=document.getElementById('mapboard');
+  board.querySelectorAll('.zonenode').forEach(n=>n.remove());
+  const order=['nervine','cardio','gut','immuno','topical','toxic'];
+  // paths
+  const paths=document.getElementById('mapPaths');let pl='';
+  for(let i=0;i<order.length-1;i++){const a=getZone(order[i]),b=getZone(order[i+1]);
+    pl+='<line x1="'+(a.x*10)+'" y1="'+(a.y*5.4)+'" x2="'+(b.x*10)+'" y2="'+(b.y*5.4)+'" stroke="#5a3d22" stroke-width="4" stroke-dasharray="3 8" stroke-linecap="round"/>';}
+  paths.innerHTML=pl;
+  order.forEach((zid,i)=>{
+    const z=getZone(zid),cleared=S.cleared.has(zid);
+    const locked = i>0 && !S.cleared.has(order[i-1]) && i!==order.indexOf('toxic') ? false : false;
+    // Toxic Vault locked until 5 others cleared
+    const isToxic=zid==='toxic';
+    const unlockToxic=['nervine','cardio','gut','immuno','topical'].every(x=>S.cleared.has(x));
+    const lock = isToxic && !unlockToxic;
+    const node=document.createElement('div');
+    node.className='zonenode'+(cleared?' cleared':'')+(lock?' locked':'');
+    node.style.left=z.x+'%';node.style.top=z.y+'%';node.style.setProperty('--zc',z.color);
+    node.innerHTML='<div class="orb">'+z.emoji+'</div><div class="znm">'+z.name+'</div><div class="zsub">'+(cleared?'✓ cleared':z.sub)+'</div>';
+    node.onclick=()=>{ if(lock){toast('🔒 Clear the five wilds to unlock the Vault');return;} enterZone(zid); };
+    board.appendChild(node);
+  });
+  // clouds
+  const cl=document.getElementById('mapClouds');if(!cl.dataset.init){cl.dataset.init='1';
+    for(let i=0;i<4;i++){const c=document.createElement('div');c.className='cloud';c.textContent='☁️';
+      c.style.top=(10+Math.random()*70)+'%';const d=30+Math.random()*30;c.style.animationDuration=d+'s';c.style.animationDelay=(-Math.random()*d)+'s';cl.appendChild(c);}}
+}
+
+/* ============================================================
+   ZONE ENTRY / BOSS
+   ============================================================ */
+function enterZone(zid){
+  sfx('click');
+  S.zone=getZone(zid);S.caseIdx=0;S.hearts=3;S.frenzied=false;
+  S.bossMax=S.zone.cases.length;S.bossHP=S.bossMax;
+  document.getElementById('arena').style.setProperty('--zc',S.zone.color);
+  document.getElementById('arena').style.setProperty('--arena-rgb',S.zone.rgb);
+  document.getElementById('benchScreen').style.setProperty('--zc',S.zone.color);
+  document.getElementById('b_zoneName').textContent=S.zone.name;
+  document.getElementById('b_caseTot').textContent=S.zone.cases.length;
+  document.getElementById('bossName').textContent=S.zone.boss.name;
+  document.getElementById('bossMon').innerHTML=pixelMonster(S.zone);
+  document.getElementById('cauldron').innerHTML=cauldronSVG();
+  renderForms();renderShelf();buildWeather();showScreen('benchScreen');
+  loadCase();updateBoss(S.zone.boss.taunt);
+}
+function updateBoss(taunt){
+  const pct=S.bossHP/S.bossMax*100;
+  document.getElementById('hpfill').style.width=pct+'%';
+  document.getElementById('hplabel').textContent='HP '+S.bossHP+' / '+S.bossMax;
+  document.getElementById('hpbar').classList.toggle('enraged',pct<=50&&pct>0);
+  document.getElementById('hearts').textContent='❤️'.repeat(S.hearts)+'🖤'.repeat(3-S.hearts);
+  if(taunt!=null)document.getElementById('bossTaunt').textContent='“'+taunt+'”';
+  document.getElementById('b_coins').textContent=S.coin;
+  document.getElementById('b_caseNo').textContent=Math.min(S.caseIdx+1,S.zone.cases.length);
+}
+
+/* ---------- weather ---------- */
+function buildWeather(){
+  const w=document.getElementById('weather');w.innerHTML='';const z=S.zone;
+  const map={spores:{g:['🌫️','✦','·'],rise:false,col:'#b39cff'},embers:{g:['🔥','✦','•'],rise:true,col:'#ff7a3d'},
+    bubbles:{g:['○','◌','•'],rise:true,col:'#e0a83c'},sparks:{g:['✦','✧','·'],rise:false,col:'#4fd0c0'},
+    haze:{g:['〰️','░','·'],rise:true,col:'#ff9a3c'},omen:{g:['☠️','✦','•'],rise:false,col:'#b06cff'}};
+  const cfg=map[z.weather]||map.spores;
+  for(let i=0;i<26;i++){const s=document.createElement('div');s.className='wp';
+    s.textContent=cfg.g[i%cfg.g.length];s.style.left=(Math.random()*100)+'%';
+    s.style.color=cfg.col;s.style.opacity=(0.25+Math.random()*0.4);s.style.fontSize=(10+Math.random()*18)+'px';
+    const dur=6+Math.random()*8;s.style.animationName=cfg.rise?'wrise':'wfall';
+    s.style.animationDuration=dur+'s';s.style.animationDelay=(-Math.random()*dur)+'s';w.appendChild(s);}
+}
+
+/* ============================================================
+   BENCH RENDER
+   ============================================================ */
+function renderForms(){
+  const r=document.getElementById('formRow');r.innerHTML='';
+  FORMS.forEach(f=>{const d=document.createElement('button');d.className='formchip'+(S.form===f.id?' sel':'');
+    d.innerHTML='<span class="fi">'+f.fi+'</span>'+f.nm;d.onclick=()=>{S.form=f.id;sfx('click');renderForms();tintCauldron();};r.appendChild(d);});
+}
+function zoneShelf(){
+  // herbs in zone + every herb referenced by zone cases (good/alt/trap/refuse)
+  const ids=new Set(DECK.filter(d=>d.z===S.zone.id).map(d=>d.id));
+  S.zone.cases.forEach(c=>{(c.good||[]).forEach(i=>ids.add(i));(c.alt||[]).forEach(i=>ids.add(i));(c.trapIds||[]).forEach(i=>ids.add(i));if(c.refuseId)ids.add(c.refuseId);});
+  return DECK.filter(d=>ids.has(d.id));
+}
+function renderShelf(){
+  const sh=document.getElementById('shelf');sh.innerHTML='';
+  zoneShelf().forEach(d=>{const r=RAR[d.rar];const c=document.createElement('div');
+    c.className='icard'+(d.rar==='danger'?' danger':'')+(d.rar==='legendary'?' foil':'')+(S.mastered.has(d.id)?' mastered':'');
+    c.style.setProperty('--rar',r.c);c.title='Tap to study notecard';
+    c.innerHTML='<span class="info" onclick="event.stopPropagation();showNote(\''+d.id+'\')">ⓘ</span><span class="rar">'+r.l+'</span>'+
+      '<div class="emoji">'+d.emoji+'</div><div class="nm">'+d.nm+'</div><div class="lat">'+d.lat+'</div>'+
+      '<button class="add" onclick="event.stopPropagation();addToBench(\''+d.id+'\')">+ ADD</button>';
+    c.onclick=()=>showNote(d.id);sh.appendChild(c);});
+}
+function addToBench(id){
+  if(S.bench.includes(id)){toast('Already on the bench');return;}
+  if(S.bench.length>=4){toast('Bench is full (max 4)');return;}
+  S.bench.push(id);sfx('click');renderSlots();tintCauldron();
+}
+function removeBench(id){S.bench=S.bench.filter(x=>x!==id);renderSlots();tintCauldron();}
+function renderSlots(){
+  const s=document.getElementById('slots');
+  if(!S.bench.length){s.innerHTML='<span class="slot-empty">— add botanicals from the shelf —</span>';return;}
+  s.innerHTML='';S.bench.forEach(id=>{const d=byId(id);const e=document.createElement('div');e.className='benchitem';
+    e.innerHTML='<span class="emoji">'+d.emoji+'</span>'+d.nm+' <span class="x" onclick="removeBench(\''+id+'\')">✕</span>';s.appendChild(e);});
+}
+function tintCauldron(){
+  const liq=document.getElementById('liqRect');if(!liq)return;
+  const tints={common:'#3a7a32',rare:'#2a6a8a',legendary:'#b58a1e',danger:'#7a2a2a'};
+  let col='#2e2418';
+  if(S.bench.length){const rar=byId(S.bench[S.bench.length-1]).rar;col=tints[rar]||'#3a7a32';}
+  liq.setAttribute('fill',col);
+}
+function loadCase(){
+  S.form=null;S.bench=[];const c=S.zone.cases[S.caseIdx];
+  const h=document.getElementById('caseHolder');
+  const flags=c.flags.map(f=>'<span class="flag '+f.c+'">'+f.t+'</span>').join('');
+  let refuseBtn = c.answerIsRefuse ? '<button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="refuseDispense()">🚫 REFUSE TO DISPENSE</button>' : '';
+  h.innerHTML='<div class="casecard"><div class="who"><span class="av">'+c.av+'</span>'+c.who+'</div>'+
+    '<div class="complaint">'+c.complaint+'</div><div class="flagrow">'+flags+'</div></div>'+refuseBtn;
+  renderForms();renderSlots();tintCauldron();updateBoss(null);
+}
+
+/* ============================================================
+   NOTECARD
+   ============================================================ */
+function showNote(id){
+  const d=byId(id),r=RAR[d.rar];const m=document.getElementById('noteModal');
+  m.innerHTML='<div class="mhead" style="border-color:'+r.c+'"><span class="note-emoji">'+d.emoji+'</span>'+
+    '<div><div class="note-title">'+d.nm+'</div><div class="note-lat">'+d.lat+'</div></div>'+
+    '<button class="closeb" onclick="closeNote()">✕ CLOSE</button></div><div class="mbody">'+
+    '<div class="note-sec"><span class="lbl action">ACTIONS</span><p>'+d.action+'</p></div>'+
+    '<div class="note-sec"><span class="lbl use">USED FOR</span><p>'+d.use+'</p></div>'+
+    '<div class="note-sec warn"><span class="lbl warn">⚠ CAUTIONS &amp; INTERACTIONS</span><p>'+d.warn+'</p></div>'+
+    '<div class="note-sec"><span class="lbl prep">PREPARATION</span><p>'+d.prep+'</p></div>'+
+    '<div id="pharmaSlot" style="margin-top:14px"><button class="revealbtn" onclick="revealPharma(\''+d.id+'\')">🔬 REVEAL THE DRUG INSIDE</button></div></div>';
+  document.getElementById('noteOverlay').classList.add('show');sfx('click');
+}
+function revealPharma(id){const d=byId(id);document.getElementById('pharmaSlot').innerHTML=
+  '<div class="pharma"><div class="ph-lbl">💊 THE PHARMACOLOGY BRIDGE</div><div class="ph-drug">'+d.drug+'</div><p>'+d.bridge+'</p></div>';sfx('coin');}
+function closeNote(){document.getElementById('noteOverlay').classList.remove('show');}
+
+/* ============================================================
+   BREW + GRADE + BOSS COMBAT
+   ============================================================ */
+function refuseDispense(){
+  const c=S.zone.cases[S.caseIdx];
+  if(c.answerIsRefuse){ damageBoss(); winCase(c,'good','🛡️','WISELY REFUSED',[{cls:'good',html:c.teach}]); }
+  else { loseHeart(); showResult('warn','🤷','A REMEDY WAS NEEDED',[{cls:'',html:'This patient genuinely needed a preparation — refusing wasn\'t the answer here. '+c.teach}]); }
+}
+function brew(){
+  const c=S.zone.cases[S.caseIdx];
+  if(!S.form){toast('Choose a preparation form first');return;}
+  if(!S.bench.length){toast('Add at least one botanical');return;}
+  const pot=document.getElementById('cauldron');pot.style.transform='scale(1.04)';
+  const btn=document.getElementById('brewBtn');btn.disabled=true;sfx('brew');
+  // bubble particles from cauldron
+  const rect=pot.getBoundingClientRect();
+  burst(rect.left+rect.width/2,rect.top+rect.height*0.45,{n:16,colors:['#9be37e','#fff0b0','#5ec8ff'],up:3,g:0.04,life:40,size:3,speed:2});
+  setTimeout(()=>{pot.style.transform='';btn.disabled=false;grade(c);},900);
+}
+function grade(c){
+  const chosen=new Set(S.bench);
+  if(c.answerIsRefuse){ // these cases must be refused; any compound is dangerous
+    loseHeart();const tHit=(c.trapIds||[]).filter(t=>chosen.has(t));
+    let lines=[{cls:'bad',html:'You should NOT have compounded anything here.'}];
+    if(tHit.length){const d=byId(tHit[0]);lines.unshift({cls:'bad',html:'<b>'+d.nm+'</b> is a poison, not a remedy.'});}
+    lines.push({cls:'',html:c.teach});
+    bossAttack();showResult('bad','☠️','DANGEROUS DISPENSE',lines);return;
+  }
+  const trapsHit=(c.trapIds||[]).filter(t=>chosen.has(t));
+  const correctSet=new Set([...(c.good||[]),...(c.alt||[])]);
+  const hasGood=[...chosen].some(x=>correctSet.has(x));
+  const allValid=[...chosen].every(x=>correctSet.has(x));
+  const okForm=(c.goodForms||[]).includes(S.form)||(c.altForms||[]).includes(S.form);
+  if(trapsHit.length){
+    loseHeart();let lines=[];
+    trapsHit.forEach(t=>{const d=byId(t);lines.push({cls:'bad',html:'<b>'+d.nm+'</b> was the wrong call. '+shortWarn(t,c)});});
+    lines.push({cls:'',html:c.teach});
+    bossAttack();showResult('bad',c.hardTrap?'☠️':'⚠️',c.hardTrap?'DANGEROUS DISPENSE':'WRONG REMEDY',lines);
+  } else if(hasGood&&allValid&&okForm){
+    [...chosen].forEach(x=>{if(correctSet.has(x))S.mastered.add(x);});
+    S.coin+=c.reward;damageBoss();
+    winCase(c,'good','✨','PERFECT COMPOUND',[{cls:'good',html:'Spot on. '+c.teach}]);
+  } else if(hasGood&&!okForm){
+    loseHeart();const gf=(c.goodForms||[]).concat(c.altForms||[]).map(f=>FORMS.find(x=>x.id===f).nm).join(' or ');
+    showResult('warn','🤔','RIGHT HERB, WRONG FORM',[{cls:'',html:'Good botanical — but the preparation matters. Try <b>'+gf+'</b>.'},{cls:'',html:c.teach}]);
+  } else {
+    loseHeart();showResult('warn','🌀','INEFFECTIVE BLEND',[{cls:'',html:'This blend won\'t address the complaint. '+c.teach}]);
+  }
+  save();
+}
+function shortWarn(id,c){
+  if(c.flags.some(f=>/warfarin/i.test(f.t))) return 'On warfarin, its bleeding/antiplatelet effect is additive — real harm.';
+  if(c.flags.some(f=>/digoxin/i.test(f.t))) return 'With digoxin\'s narrow window, this can tip toward toxic arrhythmia.';
+  if(c.flags.some(f=>/hypertension|blood pressure/i.test(f.t))) return 'It raises blood pressure and lowers potassium — wrong here.';
+  if(c.flags.some(f=>/autoimmune/i.test(f.t))) return 'It stimulates the immune system — it can flare autoimmune disease.';
+  if(c.flags.some(f=>/pregnant/i.test(f.t))) return 'It is contraindicated in pregnancy.';
+  if(c.flags.some(f=>/open wound/i.test(f.t))) return 'On broken skin it is absorbed and becomes toxic.';
+  if(c.flags.some(f=>/alcohol/i.test(f.t))) return 'Stacked on alcohol it deepens CNS/liver harm.';
+  return 'Check its cautions on the notecard.';
+}
+function loseHeart(){
+  S.hearts--;sfx('wrong');
+  document.getElementById('bossPort').classList.remove('hurt');
+  if(S.hearts<=0){setTimeout(zoneDefeat,400);}
+  updateBoss(null);
+}
+function bossAttack(){
+  const bp=document.getElementById('bossPort').getBoundingClientRect();
+  const cp=document.getElementById('casePanel').getBoundingClientRect();
+  const glyphs={nervine:'🌑',cardio:'🩸',gut:'🟡',immuno:'🦠',topical:'🔥',toxic:'☠️'};
+  projectile(bp.left+bp.width/2,bp.top+bp.height/2,cp.left+cp.width/2,cp.top+40,glyphs[S.zone.id]||'💥',S.zone.color);
+}
+function damageBoss(){
+  S.bossHP=Math.max(0,S.bossHP-1);sfx('correct');
+  const port=document.getElementById('bossPort');port.classList.add('hurt');
+  const bp=port.getBoundingClientRect();
+  burst(bp.left+bp.width/2,bp.top+bp.height/2,{n:14,colors:[S.zone.color,'#fff'],speed:4,life:34,size:4});
+  setTimeout(()=>port.classList.remove('hurt'),360);
+  const pct=S.bossHP/S.bossMax*100;
+  if(pct<=50&&pct>0&&!S.frenzied){S.frenzied=true;setTimeout(()=>toast('⚠ '+S.zone.boss.name+' is ENRAGED!'),200);}
+  updateBoss(null);
+}
+function winCase(c,tier,icon,big,lines){ save();showResult(tier,icon,big,lines); }
+
+function showResult(tier,icon,big,lines){
+  const m=document.getElementById('resultModal');
+  let html='<div class="result-banner '+tier+'"><span class="icon">'+icon+'</span><div class="big">'+big+'</div></div><div class="rationale">';
+  lines.forEach(l=>{html+='<div class="rline '+(l.cls||'')+'">'+l.html+'</div>';});
+  html+='</div>';
+  const bossDead=S.bossHP<=0;
+  const label = bossDead ? '🏆 STRIKE THE FINAL BLOW' : (tier==='good' || tier==='bad' && S.hearts>0 ? '➡ CONTINUE' : '➡ CONTINUE');
+  html+='<button class="nextbtn" onclick="afterResult()">'+(bossDead?'🏆 FINISH THE BOSS':'➡ CONTINUE')+'</button>';
+  m.innerHTML=html;document.getElementById('resultOverlay').classList.add('show');
+}
+function afterResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+  if(S.hearts<=0)return; // defeat already triggered
+  if(S.bossHP<=0){bossShatter();return;}
+  // advance to next unsolved case (wrap if needed). We advance only after a correct (boss damaged) OR retry same on wrong.
+  // Determine: if last result reduced HP, move forward; else retry same case.
+  // Simpler: always move to next case index; if past end but boss alive, loop back to first unsolved.
+  S.caseIdx++;
+  if(S.caseIdx>=S.zone.cases.length){S.caseIdx=0;}
+  loadCase();
+}
+function zoneDefeat(){
+  const m=document.getElementById('resultModal');
+  m.innerHTML='<div class="result-banner bad"><span class="icon">💀</span><div class="big">YOU WERE OVERWHELMED</div></div>'+
+    '<div class="rationale"><div class="rline bad">'+S.zone.boss.name+' drained your last heart. The wild is not yet healed.</div>'+
+    '<div class="rline">Study the notecards — every wrong dispense was a teachable interaction — and try the zone again.</div></div>'+
+    '<button class="nextbtn" onclick="document.getElementById(\'resultOverlay\').classList.remove(\'show\');enterZone(S.zone.id);">🔄 RETRY ZONE</button>';
+  document.getElementById('resultOverlay').classList.add('show');sfx('hurt');
+}
+function bossShatter(){
+  const port=document.getElementById('bossPort');port.classList.add('dead');sfx('shatter');
+  const bp=port.getBoundingClientRect();
+  burst(bp.left+bp.width/2,bp.top+bp.height/2,{n:46,colors:[S.zone.color,'#fff',S.zone.accent||'#fff'],speed:7,life:60,size:5,shape:'rect',g:0.18});
+  // reward card = a legendary/representative herb from zone
+  const rewardId=(DECK.filter(d=>d.z===S.zone.id&&d.rar!=='danger').slice(-1)[0]||DECK.find(d=>d.z===S.zone.id)).id;
+  S.owned.add(rewardId);S.mastered.add(rewardId);
+  if(!S.cleared.has(S.zone.id)){S.cleared.add(S.zone.id);S.coin+=100;}
+  save();
+  setTimeout(()=>{document.getElementById('resultOverlay').classList.remove('show');zoneVictory(rewardId);},900);
+}
+function zoneVictory(rewardId){
+  sfx('victory');coinShower();
+  const allCleared=ZONES.every(z=>S.cleared.has(z.id));
+  const rd=byId(rewardId);
+  const m=document.getElementById('resultModal');
+  m.innerHTML='<div class="result-banner good"><span class="icon">🏆</span><div class="big">'+S.zone.boss.name+' SHATTERED</div></div>'+
+    '<div class="rationale"><div class="rline good">The '+S.zone.name+' is healed. <b>+100 🪙</b> bonus.</div>'+
+    '<div class="rline">Reward card mastered: <b>'+rd.emoji+' '+rd.nm+'</b> ('+RAR[rd.rar].l+').</div></div>'+
+    '<button class="nextbtn" onclick="afterVictory('+(allCleared?'true':'false')+')">'+(allCleared?'🌌 WITNESS THE END':'🗺 RETURN TO MAP')+'</button>';
+  document.getElementById('resultOverlay').classList.add('show');
+  checkAchievements();
+}
+function afterVictory(all){
+  document.getElementById('resultOverlay').classList.remove('show');
+  if(all){finalCutscene();}else{gotoMap();}
+}
+function confirmLeave(){
+  if(S.bossHP<S.bossMax && S.bossHP>0){ if(!confirm('Leave the battle? Boss HP resets next time.'))return; }
+  gotoMap();
+}
+
+/* ============================================================
+   GRIMOIRE
+   ============================================================ */
+function openGrimoire(){
+  sfx('click');const m=document.getElementById('grimModal');
+  let zonesHtml=ZONES.map(z=>{
+    const cards=DECK.filter(d=>d.z===z.id).map(d=>{const r=RAR[d.rar];const owned=S.mastered.has(d.id);
+      return '<div class="icard'+(d.rar==='danger'?' danger':'')+(d.rar==='legendary'?' foil':'')+(owned?' mastered':'')+'" style="--rar:'+r.c+'" onclick="showNote(\''+d.id+'\')">'+
+        '<span class="rar">'+r.l+'</span><div class="emoji">'+d.emoji+'</div><div class="nm">'+d.nm+'</div><div class="lat">'+d.lat+'</div>'+
+        '<div style="font-size:13px;color:#9a8358;margin-top:5px">'+(owned?'★ mastered':'tap to study')+'</div></div>';}).join('');
+    return '<div style="margin:14px 0 6px;font-family:var(--font-disp);font-weight:900;font-size:18px;color:'+z.color+'">'+z.emoji+' '+z.name+(S.cleared.has(z.id)?' ✓':'')+'</div><div class="grim-grid">'+cards+'</div>';
+  }).join('');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">📖</span><div><div class="note-title">The Grimoire</div>'+
+    '<div class="note-lat">'+S.mastered.size+' of '+DECK.length+' botanicals mastered · '+S.cleared.size+'/6 zones</div></div>'+
+    '<button class="closeb" onclick="closeGrimoire()">✕ CLOSE</button></div><div class="mbody">'+zonesHtml+'</div>';
+  document.getElementById('grimOverlay').classList.add('show');
+}
+function closeGrimoire(){document.getElementById('grimOverlay').classList.remove('show');}
+
+/* ============================================================
+   SHOP
+   ============================================================ */
+const SHOP=[
+ {id:'hint',si:'💡',nm:'Apothecary\'s Hint',cost:20,desc:'Reveal the ideal form for the current case (in battle).'},
+ {id:'heart',si:'❤️',nm:'Restorative Draught',cost:40,desc:'Restore one heart during a battle.'},
+ {id:'reveal',si:'🔬',nm:'Master a Random Plant',cost:60,desc:'Instantly master an un-mastered botanical for your Grimoire.'}
+];
+function openShop(){
+  sfx('click');const m=document.getElementById('shopModal');
+  let items=SHOP.map(s=>'<div class="shopitem"><div class="si">'+s.si+'</div><div class="sd"><b>'+s.nm+'</b><p>'+s.desc+'</p></div>'+
+    '<button class="btn sm '+(S.coin>=s.cost?'green':'ghost')+'" onclick="buy(\''+s.id+'\')">🪙 '+s.cost+'</button></div>').join('');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">🛒</span><div><div class="note-title">The Shoppe</div>'+
+    '<div class="note-lat">You have '+S.coin+' 🪙</div></div><button class="closeb" onclick="closeShop()">✕ CLOSE</button></div>'+
+    '<div class="mbody"><div class="shop-grid">'+items+'</div>'+
+    '<p style="font-size:15px;color:#9a8358;margin-top:12px">Earn coins by compounding correctly and shattering bosses (+100 each).</p></div>';
+  document.getElementById('shopOverlay').classList.add('show');
+}
+function closeShop(){document.getElementById('shopOverlay').classList.remove('show');}
+function buy(id){
+  const s=SHOP.find(x=>x.id===id);if(S.coin<s.cost){toast('Not enough coins');return;}
+  if(id==='hint'){ if(!S.zone||!document.getElementById('benchScreen').classList.contains('active')){toast('Use hints inside a battle');return;}
+    const c=S.zone.cases[S.caseIdx];const gf=(c.goodForms||[]).concat(c.altForms||[]).map(f=>FORMS.find(x=>x.id===f).nm).join(' or ')||'refuse to dispense';
+    S.coin-=s.cost;toast('💡 Best form: '+gf);}
+  else if(id==='heart'){ if(!S.zone){toast('Use in battle');return;} if(S.hearts>=3){toast('Hearts already full');return;} S.coin-=s.cost;S.hearts=Math.min(3,S.hearts+1);updateBoss(null);toast('❤️ Heart restored');}
+  else if(id==='reveal'){ const un=DECK.filter(d=>!S.mastered.has(d.id)); if(!un.length){toast('All plants mastered!');return;} S.coin-=s.cost;const pick=un[Math.floor(Math.random()*un.length)];S.mastered.add(pick.id);toast('🔬 Mastered '+pick.emoji+' '+pick.nm);}
+  sfx('coin');save();openShop();
+  document.getElementById('m_coins').textContent=S.coin;document.getElementById('b_coins').textContent=S.coin;
+  checkAchievements();
+}
+
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
+const ACHV=[
+ {id:'first',test:()=>S.cleared.size>=1,t:'First Wild Healed'},
+ {id:'half',test:()=>S.mastered.size>=Math.ceil(DECK.length/2),t:'Half the Grimoire'},
+ {id:'safety',test:()=>S.cleared.has('toxic'),t:'Keeper of the Vault'},
+ {id:'full',test:()=>S.mastered.size>=DECK.length,t:'Master Apothecary'},
+ {id:'rich',test:()=>S.coin>=300,t:'Coin Hoarder'}
+];
+function checkAchievements(){
+  ACHV.forEach(a=>{ if(!S.achv.has(a.id)&&a.test()){S.achv.add(a.id);save();achvToast(a.t);} });
+}
+function achvToast(t){
+  const el=document.getElementById('toast');el.className='toast achv show';el.innerHTML='🏅 Achievement: <b>'+t+'</b>';
+  sfx('achv');burst(innerWidth/2,innerHeight-60,{n:18,colors:['#ff6cb6','#ffd700','#5ec8ff'],speed:5,up:2,life:50,size:4});
+  clearTimeout(window._at);window._at=setTimeout(()=>{el.classList.remove('show');},2400);
+}
+
+/* ============================================================
+   FINAL CUTSCENE
+   ============================================================ */
+function finalCutscene(){
+  const cs=document.getElementById('cutscene');cs.classList.add('show');sfx('victory');
+  // constellation canvas of boss icons
+  const cv=document.getElementById('constCv'),ctx=cv.getContext('2d');
+  function rs(){cv.width=innerWidth;cv.height=innerHeight;}rs();
+  let stars=ZONES.map((z,i)=>({x:(0.16+0.68*(i/(ZONES.length-1)))*innerWidth,y:innerHeight*0.30+Math.sin(i)*40,em:z.emoji,c:z.color,t:i*8}));
+  let frame=0;
+  (function loop(){ if(!cs.classList.contains('show'))return; ctx.clearRect(0,0,cv.width,cv.height);frame++;
+    ctx.strokeStyle='rgba(255,215,0,.25)';ctx.lineWidth=1;ctx.beginPath();
+    stars.forEach((s,i)=>{ if(i)ctx.lineTo(s.x,s.y);else ctx.moveTo(s.x,s.y);});ctx.stroke();
+    stars.forEach(s=>{const tw=0.6+0.4*Math.sin((frame+s.t)/20);ctx.globalAlpha=tw;ctx.font='30px serif';ctx.fillText(s.em,s.x-15,s.y+10);
+      ctx.globalAlpha=tw*0.4;ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,26,0,7);ctx.fill();});
+    ctx.globalAlpha=1;requestAnimationFrame(loop);})();
+  const w=document.getElementById('csWrap');
+  w.innerHTML='<div class="cs-title">QUEST COMPLETE</div>'+
+    '<div class="cs-quote">Six wilds healed. Six wraiths of imbalance undone. Every plant you mastered carried a drug inside it — and you learned to read both.</div>'+
+    '<div class="cs-credit">A GAME BY DR. AKASH GARG</div>'+
+    '<div class="cs-quote" style="font-size:18px">“The dose makes the poison — and the wise apothecary makes the dose.”</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">'+
+    '<button class="btn green" onclick="closeCutscene()">↩ CONTINUE THE QUEST</button>'+
+    '<button class="btn ghost" onclick="openGrimoire()">📖 VIEW GRIMOIRE</button></div>';
+  setTimeout(coinShower,400);
+  checkAchievements();
+}
+function closeCutscene(){document.getElementById('cutscene').classList.remove('show');gotoMap();}
+
+/* ============================================================
+   STUDY HALL
+   ============================================================ */
+const STAB=[{id:'flash',ic:'🃏',nm:'Flashcards'},{id:'materia',ic:'📖',nm:'Materia Medica'},{id:'ix',ic:'⚠️',nm:'Interactions'},{id:'prog',ic:'📊',nm:'Progress'}];
+let studyCur='flash';
+let FC={queue:[],idx:0,flipped:false,zoneFilter:'all',studied:0};
+
+const INTERACTIONS=[
+ {title:'🩸 Bleeding risk — additive with anticoagulants / antiplatelets',color:'#ff5a4d',ids:['willow','turmeric','ginger','garlic','ginkgo','feverfew','ginseng','cayenne'],note:'Never stack these on warfarin, aspirin, or before surgery. "Natural anti-inflammatory" almost always means "additive bleeding."'},
+ {title:'🤰 Avoid in pregnancy',color:'#d95ea8',ids:['valerian','passionflower','feverfew','willow','senna','licorice','goldenseal','motherwort','wormwood','pennyroyal','kava'],note:'Lack of safety data, uterine activity, or outright toxicity. Default to ginger, chamomile, lemon balm, or slippery elm when pregnant.'},
+ {title:'🫀 Hepatotoxic — can injure the liver',color:'#c9842b',ids:['kava','comfrey','pennyroyal','wormwood'],note:'Never give to someone with liver stress or on other hepatotoxic drugs. Comfrey is intact-skin topical only — never internal.'},
+ {title:'🛡️ Immunostimulant — caution in autoimmune disease',color:'#4fd0c0',ids:['echinacea','astragalus','ginseng','elderberry'],note:'They rev up the immune system, which can flare autoimmune conditions and oppose immunosuppressants like methotrexate.'},
+ {title:'💓 Heart-drug potentiators (digoxin / blood pressure)',color:'#ff9a3c',ids:['hawthorn','licorice','foxglove'],note:'Hawthorn and foxglove act on the heart; licorice drops potassium → digoxin toxicity. Cardiac patients belong with a prescriber.'},
+ {title:'🧴 Topical only — toxic if taken internally or on broken skin',color:'#9b8cff',ids:['arnica','comfrey','aloe'],note:'Great on intact skin, dangerous swallowed or on open wounds. Aloe GEL is topical; aloe LATEX is a harsh laxative.'},
+ {title:'☠️ Never dispense — toxic plants (the Vault)',color:'#b06cff',ids:['foxglove','belladonna','hemlock','wormwood','pennyroyal'],note:'No safe hand-compounded dose. The correct clinical action is to REFUSE and refer to emergency care.'},
+ {title:'😴 Additive sedation with CNS depressants / alcohol',color:'#6fae5a',ids:['valerian','kava','passionflower','lemonbalm','chamomile','lavender'],note:'Calming herbs stack with alcohol, benzodiazepines and opioids — deepening sedation. Always check the whole drug list.'}
+];
+
+function openStudy(){sfx('click');showScreen('studyScreen');renderStudyTabs();studyTab(studyCur);}
+function renderStudyTabs(){
+  const t=document.getElementById('studyTabs');t.innerHTML='';
+  STAB.forEach(s=>{const b=document.createElement('button');b.className='stab'+(studyCur===s.id?' sel':'');
+    b.innerHTML='<span>'+s.ic+'</span>'+s.nm;b.onclick=()=>studyTab(s.id);t.appendChild(b);});
+}
+function studyTab(id){studyCur=id;renderStudyTabs();sfx('click');
+  if(id==='flash')renderFlashTab();else if(id==='materia')renderMateria();else if(id==='ix')renderIx();else renderProg();}
+
+/* ---- Flashcards (spaced repetition) ---- */
+function srLabel(b){return b>=2?'mastered':b===1?'familiar':'learning';}
+function buildFlashQueue(){
+  let ids=DECK.filter(d=>FC.zoneFilter==='all'||d.z===FC.zoneFilter).map(d=>d.id);
+  ids.sort((a,b)=>((S.srBox[a]||0)-(S.srBox[b]||0))||(Math.random()-0.5));
+  FC.queue=ids;FC.idx=0;FC.flipped=false;
+}
+function renderFlashTab(){
+  if(!FC.queue.length)buildFlashQueue();
+  const body=document.getElementById('studyBody');
+  let filters='<button class="'+(FC.zoneFilter==='all'?'sel':'')+'" onclick="setFcZone(\'all\')">ALL</button>'+
+    ZONES.map(z=>'<button class="'+(FC.zoneFilter===z.id?'sel':'')+'" style="--zcf:'+z.color+'" onclick="setFcZone(\''+z.id+'\')">'+z.emoji+' '+z.id+'</button>').join('');
+  body.innerHTML='<div class="studyhd"><h2>🃏 Flashcards</h2><p>Active recall — read the plant, recall its uses, cautions &amp; the drug inside, then flip and rate yourself honestly.</p></div>'+
+    '<div class="fcwrap"><div class="fcfilter">'+filters+'</div><div class="fcstat" id="fcStat"></div>'+
+    '<div class="fcard" id="fcard" onclick="flipCard()"><div class="fc-inner" id="fcInner"></div></div>'+
+    '<div class="rate"><button class="again" onclick="rateCard(\'again\')">↺ AGAIN</button>'+
+    '<button class="good" onclick="rateCard(\'good\')">✓ GOOD</button>'+
+    '<button class="easy" onclick="rateCard(\'easy\')">★ EASY</button></div>'+
+    '<div style="font-size:15px;color:#9a8358">Tip: press <b style="color:var(--ap-gold)">Space</b> to flip · <b style="color:var(--ap-gold)">1 / 2 / 3</b> to rate.</div></div>';
+  renderFlash();
+}
+function setFcZone(z){FC.zoneFilter=z;buildFlashQueue();renderFlashTab();}
+function renderFlash(){
+  const d=byId(FC.queue[FC.idx]);if(!d)return;const r=RAR[d.rar];
+  const inner=document.getElementById('fcInner');inner.className='fc-inner'+(FC.flipped?' flipped':'');
+  const front='<div class="fc-face fc-front" style="--rar:'+r.c+'"><div class="fe">'+d.emoji+'</div>'+
+    '<div class="fn">'+d.nm+'</div><div class="fl">'+d.lat+'</div>'+
+    '<div class="fprompt">What are its actions, uses, key cautions — and the modern drug hidden inside?</div>'+
+    '<div class="ftap">▼ TAP TO FLIP ▼</div></div>';
+  const back='<div class="fc-face fc-back" style="--rar:'+r.c+'"><div class="bnm">'+d.emoji+' '+d.nm+'</div>'+
+    '<div class="note-sec"><span class="lbl action">ACTIONS</span><p>'+d.action+'</p></div>'+
+    '<div class="note-sec"><span class="lbl use">USED FOR</span><p>'+d.use+'</p></div>'+
+    '<div class="note-sec warn"><span class="lbl warn">⚠ CAUTIONS</span><p>'+d.warn+'</p></div>'+
+    '<div class="note-sec"><span class="lbl prep">PREP</span><p>'+d.prep+'</p></div>'+
+    '<div class="pharma"><div class="ph-lbl">💊 DRUG INSIDE</div><div class="ph-drug">'+d.drug+'</div><p>'+d.bridge+'</p></div></div>';
+  inner.innerHTML=front+back;
+  document.getElementById('fcStat').innerHTML='Card <b>'+(FC.idx+1)+'</b>/'+FC.queue.length+' · '+(FC.zoneFilter==='all'?'All zones':getZone(FC.zoneFilter).name)+' · status: <b>'+srLabel(S.srBox[d.id]||0)+'</b> · studied this visit: <b>'+FC.studied+'</b>';
+}
+function flipCard(){FC.flipped=!FC.flipped;const inn=document.getElementById('fcInner');if(inn)inn.className='fc-inner'+(FC.flipped?' flipped':'');sfx('click');}
+function rateCard(lvl){
+  if(studyCur!=='flash')return;
+  const id=FC.queue[FC.idx];if(!id)return;
+  if(lvl==='again')S.srBox[id]=0;
+  else if(lvl==='good')S.srBox[id]=Math.min(2,(S.srBox[id]||0)+1);
+  else S.srBox[id]=2;
+  if((S.srBox[id]||0)>=2)S.mastered.add(id);
+  FC.studied++;save();sfx(lvl==='again'?'wrong':'coin');
+  FC.idx++;if(FC.idx>=FC.queue.length){buildFlashQueue();toast('🔁 Deck cycled — '+FC.studied+' cards studied');}
+  FC.flipped=false;renderFlash();checkAchievements();
+}
+
+/* ---- Materia Medica ---- */
+function renderMateria(){
+  const body=document.getElementById('studyBody');
+  body.innerHTML='<div class="studyhd"><h2>📖 Materia Medica</h2><p>The full reference — every botanical, searchable. Tap any card for its notecard &amp; drug bridge.</p></div>'+
+    '<input class="mmsearch" id="mmSearch" placeholder="🔎 Search name, action, use, or drug…" oninput="filterMateria()"><div id="mmList"></div>';
+  filterMateria();
+}
+function filterMateria(){
+  const q=(document.getElementById('mmSearch').value||'').toLowerCase();
+  const list=document.getElementById('mmList');let h='';
+  ZONES.forEach(z=>{
+    const cards=DECK.filter(d=>d.z===z.id).filter(d=>!q||(d.nm+' '+d.lat+' '+d.action+' '+d.drug+' '+d.use).toLowerCase().indexOf(q)>=0);
+    if(!cards.length)return;
+    h+='<div style="margin:14px 0 6px;font-family:var(--font-disp);font-weight:900;font-size:18px;color:'+z.color+'">'+z.emoji+' '+z.name+'</div><div class="grim-grid">';
+    cards.forEach(d=>{const r=RAR[d.rar];const owned=S.mastered.has(d.id);
+      h+='<div class="icard'+(d.rar==='danger'?' danger':'')+(d.rar==='legendary'?' foil':'')+(owned?' mastered':'')+'" style="--rar:'+r.c+'" onclick="showNote(\''+d.id+'\')">'+
+        '<span class="rar">'+r.l+'</span><div class="emoji">'+d.emoji+'</div><div class="nm">'+d.nm+'</div><div class="lat">'+d.lat+'</div>'+
+        '<div style="font-size:13px;color:#9a8358;margin-top:5px">'+(owned?'★ mastered':'tap to study')+'</div></div>';});
+    h+='</div>';
+  });
+  if(!h)h='<div style="text-align:center;padding:3rem;color:#9a8358">No botanicals match that search.</div>';
+  list.innerHTML=h;
+}
+
+/* ---- Interactions ---- */
+function renderIx(){
+  const body=document.getElementById('studyBody');
+  let h='<div class="studyhd"><h2>⚠️ Interaction Quick-Reference</h2><p>The high-yield safety patterns — the "why" behind the boss traps. Tap a plant to open its notecard.</p></div>';
+  INTERACTIONS.forEach(g=>{
+    h+='<div class="ixgroup" style="--ic:'+g.color+'"><h4>'+g.title+'</h4><p>'+g.note+'</p><div class="ixchips">';
+    g.ids.forEach(id=>{const d=byId(id);if(!d)return;h+='<span class="ixchip" onclick="showNote(\''+id+'\')"><span class="ce">'+d.emoji+'</span>'+d.nm+'</span>';});
+    h+='</div></div>';
+  });
+  body.innerHTML=h;
+}
+
+/* ---- Progress ---- */
+function renderProg(){
+  const body=document.getElementById('studyBody');
+  const masteredTot=S.mastered.size,deckTot=DECK.length;
+  let zoneBars='';
+  ZONES.forEach(z=>{const herbs=DECK.filter(d=>d.z===z.id);const m=herbs.filter(d=>S.mastered.has(d.id)).length;
+    zoneBars+='<div class="progrow"><span class="pl">'+z.emoji+' '+z.name+'</span><div class="pbar2"><i style="width:'+(m/herbs.length*100)+'%;--pc:'+z.color+'"></i></div><span class="pv">'+m+'/'+herbs.length+'</span></div>';});
+  const achvPills=ACHV.map(a=>'<span class="achvpill'+(S.achv.has(a.id)?'':' locked')+'">'+(S.achv.has(a.id)?'🏅':'🔒')+' '+a.t+'</span>').join('');
+  const boxes=[0,0,0];DECK.forEach(d=>boxes[S.srBox[d.id]||0]++);
+  body.innerHTML='<div class="studyhd"><h2>📊 Your Progress</h2><p>Mastery across the six wilds, and how your flashcards are settling in.</p></div>'+
+    '<div class="statgrid">'+
+      '<div class="statbox"><div class="sn">'+Math.round(masteredTot/deckTot*100)+'%</div><div class="sl">Grimoire mastered</div></div>'+
+      '<div class="statbox"><div class="sn">'+S.cleared.size+'/6</div><div class="sl">Zones cleared</div></div>'+
+      '<div class="statbox"><div class="sn">'+S.coin+'</div><div class="sl">🪙 Coins</div></div>'+
+      '<div class="statbox"><div class="sn">'+S.achv.size+'/'+ACHV.length+'</div><div class="sl">Achievements</div></div>'+
+    '</div>'+
+    '<h3 style="font-size:18px;color:var(--ap-gold);margin:10px 0 10px">Mastery by zone</h3>'+zoneBars+
+    '<h3 style="font-size:18px;color:var(--ap-gold);margin:18px 0 10px">Flashcard status (all '+deckTot+' plants)</h3>'+
+    '<div class="progrow"><span class="pl">🔴 Learning</span><div class="pbar2"><i style="width:'+(boxes[0]/deckTot*100)+'%;--pc:#ff5a4d"></i></div><span class="pv">'+boxes[0]+'</span></div>'+
+    '<div class="progrow"><span class="pl">🟡 Familiar</span><div class="pbar2"><i style="width:'+(boxes[1]/deckTot*100)+'%;--pc:#f0c840"></i></div><span class="pv">'+boxes[1]+'</span></div>'+
+    '<div class="progrow"><span class="pl">🟢 Mastered</span><div class="pbar2"><i style="width:'+(boxes[2]/deckTot*100)+'%;--pc:#6fae5a"></i></div><span class="pv">'+boxes[2]+'</span></div>'+
+    '<h3 style="font-size:18px;color:var(--ap-gold);margin:18px 0 10px">Achievements</h3><div class="achvlist">'+achvPills+'</div>';
+}
+
+/* ---- Printable study guide export ---- */
+function exportStudyGuide(){
+  sfx('coin');const P=[];
+  P.push('<!DOCTYPE html><html><head><meta charset="utf-8"><title>ApothecaryQuest — Materia Medica Study Guide</title><style>');
+  P.push('@page{size:letter;margin:.7in}*{box-sizing:border-box}body{font-family:Georgia,serif;color:#1a1a1a;line-height:1.55;font-size:11pt}');
+  P.push('.cover{text-align:center;padding-top:120px;page-break-after:always}.cover h1{font-size:30pt;color:#4a3018;margin:0}.cover h2{font-size:14pt;color:#6f8e4a;font-weight:normal}');
+  P.push('.cover .big{font-size:60pt}.cover .date{color:#888;font-size:9pt;margin-top:30px}.cover .credit{color:#aaa;font-size:8pt;margin-top:6px}');
+  P.push('h3.zone{font-size:15pt;color:#fff;background:#4a3018;padding:8px 12px;border-radius:5px;margin:18px 0 10px;page-break-after:avoid}');
+  P.push('.plant{border:1px solid #ddd;border-radius:6px;padding:12px 14px;margin-bottom:12px;page-break-inside:avoid}');
+  P.push('.plant h4{font-size:12.5pt;color:#4a3018;margin:0}.plant .lat{font-style:italic;color:#888;font-size:9.5pt;font-weight:normal}');
+  P.push('.plant .row{margin-top:6px;font-size:10pt}.plant .row b{color:#2a6a3a;text-transform:uppercase;font-size:8pt;letter-spacing:.5px}');
+  P.push('.warn b{color:#a32c22}.bridge{background:#eef6ff;border:1px solid #bfdbfe;border-radius:5px;padding:8px;margin-top:6px;font-size:9.5pt}.bridge b{color:#1d4e89}');
+  P.push('.ixg{border-left:4px solid #b03020;padding:6px 10px;margin-bottom:10px;page-break-inside:avoid}.ixg h4{margin:0;color:#a32c22;font-size:11pt}.ixg .pl{font-size:9.5pt;color:#444}.ixg .ch{font-size:9pt;color:#333;margin-top:3px}');
+  P.push('.case{border:1px solid #eee;border-radius:5px;padding:8px 10px;margin-bottom:8px;font-size:9.5pt;page-break-inside:avoid}.case b{color:#4a3018}');
+  P.push('.foot{text-align:center;color:#bbb;font-size:7pt;margin-top:20px}.pbreak{page-break-before:always}</style></head><body>');
+  P.push('<div class="cover"><div class="big">⚗️</div><h1>ApothecaryQuest</h1><h2>Materia Medica &amp; Clinical Study Guide</h2>');
+  P.push('<div class="date">Generated '+new Date().toLocaleDateString()+'</div><div class="credit">A teaching game by Dr. Akash Garg · botanical content for review before classroom use</div></div>');
+  ZONES.forEach(z=>{
+    P.push('<h3 class="zone">'+z.emoji+' '+z.name+' — '+z.sub+'</h3>');
+    DECK.filter(d=>d.z===z.id).forEach(d=>{
+      P.push('<div class="plant"><h4>'+d.emoji+' '+d.nm+' <span class="lat">('+d.lat+')</span></h4>');
+      P.push('<div class="row"><b>Actions</b> — '+d.action+'</div>');
+      P.push('<div class="row"><b>Used for</b> — '+d.use+'</div>');
+      P.push('<div class="row warn"><b>⚠ Cautions</b> — '+d.warn+'</div>');
+      P.push('<div class="row"><b>Preparation</b> — '+d.prep+'</div>');
+      P.push('<div class="bridge"><b>💊 Drug inside: '+d.drug+'</b><br>'+d.bridge+'</div></div>');
+    });
+  });
+  P.push('<h3 class="zone pbreak">⚠️ Clinical Interaction Quick-Reference</h3>');
+  INTERACTIONS.forEach(g=>{P.push('<div class="ixg"><h4>'+g.title+'</h4><div class="pl">'+g.note+'</div><div class="ch"><b>Plants:</b> '+g.ids.map(id=>{const d=byId(id);return d?d.nm:id;}).join(' · ')+'</div></div>');});
+  P.push('<h3 class="zone pbreak">📜 Case Teaching Points</h3>');
+  ZONES.forEach(z=>{z.cases.forEach(c=>{P.push('<div class="case"><b>'+z.name+' — '+c.who+'</b><br><i>'+c.complaint+'</i><br>→ '+c.teach+'</div>');});});
+  P.push('<div class="foot">ApothecaryQuest Study Guide · Dr. Akash Garg · '+DECK.length+' botanicals · '+ZONES.reduce((n,z)=>n+z.cases.length,0)+' cases</div></body></html>');
+  try{
+    const blob=new Blob([P.join('')],{type:'text/html'});const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='ApothecaryQuest_StudyGuide.html';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),3000);
+    toast('📄 Study guide downloaded — open it, then Print → Save as PDF');
+  }catch(e){toast('Export failed: '+e.message);}
+}
+
+/* ============================================================
+   TOAST + BOOT
+   ============================================================ */
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.className='toast show';t.innerHTML=msg;clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1900);}
+
+initFloatHerbs('floatHerbs');initFloatHerbs('gateHerbs');
+window.addEventListener('load',function(){var pw=document.getElementById('pw');if(pw)pw.focus();});
+document.getElementById('titleHint').textContent=ZONES.length+' zones · '+DECK.length+' botanicals · '+ZONES.reduce((n,z)=>n+z.cases.length,0)+' cases';
+addEventListener('keydown',e=>{ if(document.getElementById('gate').style.display!=='none'&&document.getElementById('gate').style.opacity!=='0')return;
+  if(document.getElementById('titleScreen').classList.contains('active')&&(e.key==='Enter'||e.key===' '))gotoMap(); });
+addEventListener('keydown',e=>{
+  if(!document.getElementById('studyScreen').classList.contains('active')||studyCur!=='flash')return;
+  if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+  if(e.key===' '){e.preventDefault();flipCard();}
+  else if(e.key==='1')rateCard('again'); else if(e.key==='2')rateCard('good'); else if(e.key==='3')rateCard('easy');
+});
+</script>
+</body>
+</html>
