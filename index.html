@@ -469,6 +469,8 @@ button{font-family:var(--font-read);cursor:pointer;}
     <div class="spacer"></div>
     <div class="stat">🪙 <b id="m_coins">0</b></div>
     <div class="stat">📖 <b id="m_mastered">0</b>/<b id="m_deck">39</b></div>
+    <div class="stat">🎖 <b id="m_rank">Novice</b></div>
+    <button class="navbtn" onclick="startRush()">🏥 RUSH</button>
     <button class="navbtn" onclick="startDaily()">🗓 DAILY</button>
     <button class="navbtn ghost" onclick="openStudy()">📚 STUDY</button>
     <button class="navbtn ghost" onclick="openGrimoire()">📖 GRIMOIRE</button>
@@ -558,6 +560,7 @@ button{font-family:var(--font-read);cursor:pointer;}
 <div class="overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()"><div class="modal" id="settingsModal"></div></div>
 <div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="modal" id="helpModal"></div></div>
 <div class="overlay" id="examOverlay"><div class="modal" id="examModal" style="max-width:700px"></div></div>
+<div class="overlay" id="certOverlay" onclick="if(event.target===this)closeCertificate()"><div class="modal" id="certModal"></div></div>
 
 <!-- ===================== CUTSCENE ===================== -->
 <div id="cutscene">
@@ -812,11 +815,12 @@ getZone('toxic').cases.push({av:'🌿',who:'A gardener · burned some shrubs',co
 /* ---------- STATE ---------- */
 let S={coin:0, mastered:new Set(), cleared:new Set(), owned:new Set(),
         achv:new Set(), srBox:{}, muted:false, tourSeen:false, dailyBest:0, dailyDate:'',
+        difficulty:'student', rushBest:0,
         zone:null, caseIdx:0, hearts:3, form:null, bench:[], dose:'standard', bossMax:0, bossHP:0,
         frenzied:false, lowHP:false, streak:0, bestStreak:0, lastCorrect:false, finishReady:false};
 function load(){try{const sv=JSON.parse(localStorage.getItem('apq_full_v1')||'{}');
-  if(sv.coin!=null){S.coin=sv.coin;S.mastered=new Set(sv.mastered||[]);S.cleared=new Set(sv.cleared||[]);S.owned=new Set(sv.owned||[]);S.achv=new Set(sv.achv||[]);S.srBox=sv.srBox||{};S.muted=!!sv.muted;S.tourSeen=!!sv.tourSeen;S.dailyBest=sv.dailyBest||0;S.dailyDate=sv.dailyDate||'';S.bestStreak=sv.bestStreak||0;}}catch(e){}}
-function save(){try{localStorage.setItem('apq_full_v1',JSON.stringify({coin:S.coin,mastered:[...S.mastered],cleared:[...S.cleared],owned:[...S.owned],achv:[...S.achv],srBox:S.srBox,muted:S.muted,tourSeen:S.tourSeen,dailyBest:S.dailyBest,dailyDate:S.dailyDate,bestStreak:S.bestStreak}));}catch(e){}}
+  if(sv.coin!=null){S.coin=sv.coin;S.mastered=new Set(sv.mastered||[]);S.cleared=new Set(sv.cleared||[]);S.owned=new Set(sv.owned||[]);S.achv=new Set(sv.achv||[]);S.srBox=sv.srBox||{};S.muted=!!sv.muted;S.tourSeen=!!sv.tourSeen;S.dailyBest=sv.dailyBest||0;S.dailyDate=sv.dailyDate||'';S.bestStreak=sv.bestStreak||0;S.difficulty=sv.difficulty||'student';S.rushBest=sv.rushBest||0;}}catch(e){}}
+function save(){try{localStorage.setItem('apq_full_v1',JSON.stringify({coin:S.coin,mastered:[...S.mastered],cleared:[...S.cleared],owned:[...S.owned],achv:[...S.achv],srBox:S.srBox,muted:S.muted,tourSeen:S.tourSeen,dailyBest:S.dailyBest,dailyDate:S.dailyDate,bestStreak:S.bestStreak,difficulty:S.difficulty,rushBest:S.rushBest}));}catch(e){}}
 load();
 
 /* ============================================================
@@ -936,6 +940,7 @@ function renderMap(){
   document.getElementById('m_coins').textContent=S.coin;
   document.getElementById('m_mastered').textContent=S.mastered.size;
   document.getElementById('m_deck').textContent=DECK.length;
+  var rk=document.getElementById('m_rank');if(rk)rk.textContent=rankFor(S.mastered.size);
   document.getElementById('clearedCount').textContent=S.cleared.size;
   document.getElementById('questBar').style.width=(S.cleared.size/ZONES.length*100)+'%';
   const board=document.getElementById('mapboard');
@@ -971,7 +976,7 @@ function renderMap(){
    ============================================================ */
 function enterZone(zid){
   sfx('click');
-  S.zone=getZone(zid);S.caseIdx=0;S.hearts=3;S.frenzied=false;S.lowHP=false;S.streak=0;S.finishReady=false;
+  S.zone=getZone(zid);S.caseIdx=0;S.hearts=(DIFF[S.difficulty]||DIFF.student).hearts;S.frenzied=false;S.lowHP=false;S.streak=0;S.finishReady=false;
   S.bossMax=S.zone.cases.length;S.bossHP=S.bossMax;
   document.getElementById('arena').style.setProperty('--zc',S.zone.color);
   document.getElementById('arena').style.setProperty('--arena-rgb',S.zone.rgb);
@@ -1306,6 +1311,7 @@ const ACHV=[
  {id:'half',test:()=>S.mastered.size>=Math.ceil(DECK.length/2),t:'Half the Grimoire'},
  {id:'safety',test:()=>S.cleared.has('toxic'),t:'Keeper of the Vault'},
  {id:'combo',test:()=>S.bestStreak>=7,t:'Combo Alchemist'},
+ {id:'rush',test:()=>S.rushBest>=15,t:'Clinic Hero'},
  {id:'full',test:()=>S.mastered.size>=DECK.length,t:'Master Apothecary'},
  {id:'rich',test:()=>S.coin>=300,t:'Coin Hoarder'}
 ];
@@ -1341,6 +1347,7 @@ function finalCutscene(){
     '<div class="cs-quote" style="font-size:18px">“The dose makes the poison — and the wise apothecary makes the dose.”</div>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">'+
     '<button class="btn green" onclick="closeCutscene()">↩ CONTINUE THE QUEST</button>'+
+    '<button class="btn blue" onclick="openCertificate()">🎓 CERTIFICATE</button>'+
     '<button class="btn ghost" onclick="openGrimoire()">📖 VIEW GRIMOIRE</button></div>';
   setTimeout(coinShower,400);
   checkAchievements();
@@ -1571,6 +1578,8 @@ function openSettings(){
   m.innerHTML='<div class="mhead"><span class="note-emoji">⚙️</span><div><div class="note-title">Settings</div><div class="note-lat">ApothecaryQuest</div></div><button class="closeb" onclick="closeSettings()">✕</button></div><div class="mbody">'+
     '<div class="set-row"><span class="si">'+(S.muted?'🔇':'🔊')+'</span><div class="sd"><b>Sound</b><p>Procedural effects &amp; cues</p></div><div class="toggle'+(S.muted?'':' on')+'" onclick="toggleMute();openSettings()"><i></i></div></div>'+
     '<div class="set-row"><span class="si">📲</span><div class="sd"><b>Install App</b><p>Add to home screen · play offline</p></div><button class="btn sm" onclick="installApp()">INSTALL</button></div>'+
+    '<div class="set-row"><span class="si">'+DIFF[S.difficulty].di+'</span><div class="sd"><b>Difficulty</b><p>'+DIFF[S.difficulty].sub+'</p></div><div style="display:flex;gap:4px">'+['student','clinician','master'].map(function(d){return '<button class="btn sm '+(S.difficulty===d?'green':'ghost')+'" style="padding:7px 8px" title="'+DIFF[d].nm+'" onclick="setDiff(\''+d+'\')">'+DIFF[d].di+'</button>';}).join('')+'</div></div>'+
+    '<div class="set-row"><span class="si">🎓</span><div class="sd"><b>Certificate</b><p>Print a named certificate of achievement</p></div><button class="btn sm blue" onclick="closeSettings();openCertificate()">CREATE</button></div>'+
     '<div class="set-row"><span class="si">📄</span><div class="sd"><b>Study Guide</b><p>Export the printable PDF guide</p></div><button class="btn sm blue" onclick="exportStudyGuide()">EXPORT</button></div>'+
     '<div class="set-row"><span class="si">❓</span><div class="sd"><b>How to Play</b><p>Replay the tutorial</p></div><button class="btn sm ghost" onclick="closeSettings();openHelp()">VIEW</button></div>'+
     '<div class="set-row"><span class="si">🗑️</span><div class="sd"><b>Reset Progress</b><p>Erase mastery, coins &amp; cleared zones</p></div><button class="btn sm" style="background:linear-gradient(180deg,#ff9b90,#ff5a4d)" onclick="resetProgress()">RESET</button></div>'+
@@ -1679,6 +1688,82 @@ function startDaily(){
   const r=rngFrom(hashStr(todayKey())),pool=allCases();
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
   runQuiz({title:'Daily Challenge',entries:pool.slice(0,8),timed:true,daily:true});
+}
+
+/* ============================================================
+   DIFFICULTY · RANK · CLINIC RUSH · CERTIFICATE
+   ============================================================ */
+const DIFF={student:{hearts:3,nm:'Student',di:'🎓',sub:'3 hearts · forgiving'},clinician:{hearts:2,nm:'Clinician',di:'🩺',sub:'2 hearts · sharper'},master:{hearts:1,nm:'Master',di:'⚗️',sub:'1 heart · expert'}};
+function setDiff(d){S.difficulty=d;save();openSettings();toast(DIFF[d].di+' '+DIFF[d].nm+' mode');}
+const RANKS=[{m:0,t:'Novice Forager'},{m:9,t:'Apprentice'},{m:19,t:'Journeyman Herbalist'},{m:31,t:'Adept Compounder'},{m:44,t:'Master Apothecary'}];
+function rankFor(n){let r=RANKS[0];RANKS.forEach(x=>{if(n>=x.m)r=x;});return r.t;}
+
+let RUSH=null;
+function startRush(){RUSH={score:0,lives:3,answered:false,cur:null};document.getElementById('examOverlay').classList.add('show');sfx('click');nextRush();}
+function nextRush(){RUSH.cur=makeQuestion(shuffle(allCases())[0]);RUSH.answered=false;renderRush();}
+function renderRush(){
+  const q=RUSH.cur,m=document.getElementById('examModal');
+  const optsH=q.opts.map((o,i)=>'<button class="exam-opt" id="ropt'+i+'" onclick="answerRush('+i+')"><span class="oe">'+o.emoji+'</span>'+o.label+'</button>').join('');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">🏥</span><div><div class="note-title">Clinic Rush</div><div class="note-lat">Endless · 3 strikes</div></div><button class="closeb" onclick="quitRush()">✕ QUIT</button></div>'+
+    '<div class="mbody"><div class="exam-bar"><span>Treated: <b style="color:var(--ap-gold)">'+RUSH.score+'</b></span><span style="font-size:22px">'+'❤️'.repeat(RUSH.lives)+'🖤'.repeat(3-RUSH.lives)+'</span><span class="tmr">Best: '+S.rushBest+'</span></div>'+
+    '<div class="exam-q"><div class="qcase"><div class="qw">'+q.z.emoji+' '+q.c.who+'</div><div class="qc">'+q.c.complaint+'</div></div>'+
+    '<div style="font-size:16px;color:#9a8358;margin-bottom:8px">Best choice — keep the line moving!</div>'+optsH+'</div></div>';
+}
+function answerRush(i){
+  if(RUSH.answered)return;RUSH.answered=true;const q=RUSH.cur,o=q.opts[i];
+  q.opts.forEach((oo,j)=>{const b=document.getElementById('ropt'+j);if(!b)return;b.disabled=true;if(oo.correct)b.classList.add('correct');});
+  if(o.correct){RUSH.score++;sfx('correct');}else{const b=document.getElementById('ropt'+i);if(b)b.classList.add('wrong');sfx('wrong');RUSH.lives--;}
+  const fb=document.createElement('div');fb.style.cssText='margin-top:10px;font-size:16px;color:var(--ap-parch);background:#1a120b;border-left:4px solid '+(o.correct?'var(--ap-com)':'var(--ap-danger)')+';border-radius:6px;padding:10px;line-height:1.25';
+  fb.innerHTML=(o.correct?'✅ ':'❌ ')+q.teach+'<div style="text-align:right;margin-top:8px"><button class="btn sm" onclick="afterRush()">'+(RUSH.lives<=0?'SEE SCORE':'NEXT →')+'</button></div>';
+  document.getElementById('examModal').querySelector('.exam-q').appendChild(fb);
+}
+function afterRush(){if(RUSH.lives<=0){finishRush();return;}nextRush();}
+function finishRush(){
+  const newBest=RUSH.score>S.rushBest;if(newBest)S.rushBest=RUSH.score;
+  S.coin+=RUSH.score*3;save();
+  document.getElementById('examModal').innerHTML='<div class="mhead"><span class="note-emoji">🏥</span><div><div class="note-title">Clinic Rush — Shift Over</div><div class="note-lat">+'+(RUSH.score*3)+' 🪙</div></div><button class="closeb" onclick="quitRush()">✕</button></div>'+
+    '<div class="mbody" style="text-align:center"><div class="grade-big" style="color:var(--ap-gold)">'+RUSH.score+'</div><div style="font-size:20px;color:var(--ap-parch)">patients treated</div>'+
+    (newBest?'<div style="font-size:18px;color:var(--ap-com);margin-top:6px">🏆 New best!</div>':'<div style="font-size:17px;color:var(--ap-parch-dk);margin-top:6px">Best: '+S.rushBest+'</div>')+
+    '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px"><button class="btn green" onclick="startRush()">🔄 AGAIN</button><button class="btn ghost" onclick="quitRush()">DONE</button></div></div>';
+  if(newBest)coinShower();checkAchievements();
+}
+function quitRush(){RUSH=null;document.getElementById('examOverlay').classList.remove('show');if(document.getElementById('mapScreen').classList.contains('active'))renderMap();}
+
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function openCertificate(){
+  const m=document.getElementById('certModal');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">🎓</span><div><div class="note-title">Certificate</div><div class="note-lat">'+rankFor(S.mastered.size)+' · '+S.cleared.size+'/6 wilds</div></div><button class="closeb" onclick="closeCertificate()">✕</button></div>'+
+    '<div class="mbody"><p style="font-size:18px;color:var(--ap-parch)">Enter your name as it should appear on the certificate:</p>'+
+    '<input id="certName" class="mmsearch" placeholder="Your name" maxlength="40" style="margin:0 auto 12px">'+
+    '<button class="btn green" style="width:100%" onclick="generateCertificate()">🖨 GENERATE CERTIFICATE</button>'+
+    '<p style="font-size:14px;color:#7a6440;margin-top:8px;text-align:center">Opens a printable page — Print → Save as PDF.</p></div>';
+  document.getElementById('certOverlay').classList.add('show');
+  setTimeout(function(){var n=document.getElementById('certName');if(n)n.focus();},60);
+}
+function closeCertificate(){document.getElementById('certOverlay').classList.remove('show');}
+function generateCertificate(){
+  const name=((document.getElementById('certName')||{}).value||'Apothecary').trim()||'Apothecary';
+  const pct=Math.round(S.mastered.size/DECK.length*100),rank=rankFor(S.mastered.size);
+  const P=[];
+  P.push('<!DOCTYPE html><html><head><meta charset="utf-8"><title>ApothecaryQuest Certificate</title><style>');
+  P.push('@page{size:landscape}body{font-family:Georgia,serif;margin:0;background:#241810;color:#2a1a0a}');
+  P.push('.cert{width:1000px;max-width:96vw;margin:24px auto;background:#fff8e6;border:14px solid #c9842b;border-radius:14px;padding:38px 50px;text-align:center;box-shadow:0 0 0 4px #f0c840 inset}');
+  P.push('.cert .em{font-size:58px}.cert h1{font-size:34pt;color:#4a3018;margin:4px 0;letter-spacing:1px}.cert .sub{color:#6f8e4a;font-size:13pt;margin-bottom:18px}');
+  P.push('.cert .pre{font-size:12pt;color:#777}.cert .name{font-size:30pt;color:#1d4e89;border-bottom:2px solid #c9842b;display:inline-block;padding:4px 30px;margin:8px 0 14px}');
+  P.push('.cert .body{font-size:12pt;color:#333;max-width:680px;margin:0 auto;line-height:1.5}.cert .stats{display:flex;justify-content:center;gap:34px;margin:18px 0}.cert .st{font-size:11pt;color:#555}.cert .st b{display:block;font-size:19pt;color:#6f8e4a}');
+  P.push('.cert .sign{display:flex;justify-content:space-between;margin-top:24px;font-size:10pt;color:#555}.cert .sign .l{border-top:1px solid #999;padding-top:5px;width:40%}');
+  P.push('@media print{body{background:#fff}.noprint{display:none}}</style></head><body>');
+  P.push('<div class="cert"><div class="em">⚗️</div><h1>ApothecaryQuest</h1><div class="sub">The Botanist&rsquo;s Crucible — Certificate of Achievement</div>');
+  P.push('<div class="pre">This certifies that</div><div class="name">'+escapeHtml(name)+'</div>');
+  P.push('<div class="body">has demonstrated mastery of botanical medicine and the pharmacology hidden within each plant — safely matching remedies to patients across the six wilds, and knowing when to refuse.</div>');
+  P.push('<div class="stats"><div class="st"><b>'+pct+'%</b>Grimoire mastered</div><div class="st"><b>'+S.cleared.size+'/6</b>Wilds healed</div><div class="st"><b>'+escapeHtml(rank)+'</b>Rank earned</div></div>');
+  P.push('<div class="sign"><div class="l">Dr. Akash Garg &mdash; Course Author</div><div class="l">'+new Date().toLocaleDateString()+'</div></div>');
+  P.push('</div><div class="noprint" style="text-align:center;margin:14px"><button onclick="window.print()" style="font-size:14pt;padding:10px 24px;background:#6fae5a;color:#fff;border:none;border-radius:8px;cursor:pointer">🖨 Print / Save as PDF</button></div></body></html>');
+  const html=P.join('');
+  const w=window.open('','_blank');
+  if(w){w.document.open();w.document.write(html);w.document.close();}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download='ApothecaryQuest_Certificate.html';document.body.appendChild(a);a.click();document.body.removeChild(a);}
+  closeCertificate();toast('🎓 Certificate ready — Print → Save as PDF');sfx('victory');
 }
 
 /* ============================================================
