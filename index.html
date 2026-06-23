@@ -356,10 +356,77 @@ button{font-family:var(--font-read);cursor:pointer;}
 .achvlist{display:flex;flex-wrap:wrap;gap:8px;}
 .achvpill{font-size:15px;border:2px solid var(--ap-myth);border-radius:20px;padding:6px 12px;color:var(--ap-parch);background:rgba(255,108,182,.08);}
 .achvpill.locked{border-color:#5a3d22;color:#6a5a3a;background:transparent;}
+
+/* ============ HUD CONTROLS ============ */
+#hudCtrls{position:fixed;bottom:12px;right:12px;z-index:5500;display:flex;gap:6px;}
+.hudbtn{width:40px;height:40px;border-radius:10px;border:2px solid #6a4a18;background:rgba(36,24,16,.85);color:var(--ap-parch);font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.45);backdrop-filter:blur(3px);}
+.hudbtn:hover{border-color:var(--ap-gold);} .hudbtn:active{transform:translateY(1px);}
+
+/* ============ COMBO BANNER ============ */
+#combo{position:fixed;top:16%;left:50%;transform:translateX(-50%) scale(.6);z-index:6500;pointer-events:none;opacity:0;font-family:var(--font-disp);font-weight:900;text-align:center;}
+#combo.show{animation:comboPop 1.2s ease forwards;}
+@keyframes comboPop{0%{opacity:0;transform:translateX(-50%) scale(.5)}18%{opacity:1;transform:translateX(-50%) scale(1.18)}80%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(1.06)}}
+#combo .ct{font-size:clamp(30px,8vw,64px);line-height:1;} #combo .cl{font-family:var(--font-pixel);font-size:12px;letter-spacing:.2em;margin-top:6px;}
+
+/* ============ VS BANNER ============ */
+#vsBanner{position:fixed;inset:0;z-index:6800;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;
+  background:radial-gradient(ellipse at center, rgba(20,10,30,.6), rgba(0,0,0,.92));}
+#vsBanner.show{display:flex;animation:fade .3s ease;}
+#vsBanner .vsmon{width:150px;height:150px;animation:bossbob 2.2s ease-in-out infinite;filter:drop-shadow(0 0 16px var(--zc,#fff));}
+#vsBanner .vsyou{font-family:var(--font-pixel);font-size:12px;color:var(--ap-green);letter-spacing:.3em;}
+#vsBanner .vsvs{font-family:var(--font-disp);font-weight:900;font-size:40px;color:#fff;animation:vspulse 1s infinite alternate;}
+@keyframes vspulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.25);opacity:1}}
+#vsBanner .vsboss{font-family:var(--font-disp);font-weight:900;font-size:clamp(26px,6vw,48px);color:var(--zc,#fff);text-shadow:0 0 22px var(--zc,#fff);line-height:1;}
+#vsBanner .vssub{font-size:20px;color:var(--ap-parch-dk);font-style:italic;max-width:520px;padding:0 18px;line-height:1.2;}
+
+/* ============ FINISH HIM ============ */
+#finishHim{position:fixed;top:28%;left:50%;transform:translateX(-50%);z-index:6400;pointer-events:none;opacity:0;text-align:center;}
+#finishHim.show{animation:fhShow 2.6s ease forwards;}
+@keyframes fhShow{0%{opacity:0;transform:translateX(-50%) scale(.5)}14%{opacity:1;transform:translateX(-50%) scale(1.12)}86%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0}}
+#finishHim .fht{font-family:var(--font-disp);font-weight:900;font-size:clamp(28px,7vw,56px);color:#ff3b2f;text-shadow:0 0 26px #ff3b2f,0 0 4px #000;letter-spacing:.04em;}
+#finishHim .fhs{font-family:var(--font-pixel);font-size:11px;color:#ffd0cc;margin-top:8px;}
+
+/* ============ DOSE CHIPS ============ */
+.doserow{display:flex;gap:8px;justify-content:center;margin:0 0 12px;flex-wrap:wrap;}
+.dosechip{font-family:var(--font-pixel);font-size:8px;color:var(--ap-parch);background:#1a120b;border:2px solid #5a3d22;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.dosechip .di{font-size:16px;} .dosechip.sel{border-color:var(--ap-gold);color:var(--ap-gold-bright);background:#2a1d10;box-shadow:0 0 10px rgba(240,200,64,.3);}
+
+/* ============ EXAM / DAILY ============ */
+.exam-bar{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;font-size:18px;color:var(--ap-parch-dk);gap:10px;flex-wrap:wrap;}
+.exam-bar .tmr{font-family:var(--font-pixel);font-size:13px;color:var(--ap-gold-bright);}
+.exam-q .qcase{background:repeating-linear-gradient(0deg,#e8d9b5 0 22px,#e2d2aa 22px 23px);color:#2a1a0a;border-radius:8px;padding:12px;border:2px solid #b89b66;margin-bottom:12px;}
+.exam-q .qcase .qw{font-family:var(--font-pixel);font-size:10px;color:#5a3d22;margin-bottom:5px;}
+.exam-q .qcase .qc{font-size:20px;line-height:1.18;}
+.exam-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font-size:18px;color:var(--ap-parch);background:#1a120b;border:2px solid #5a3d22;border-radius:10px;padding:12px 14px;margin-bottom:9px;cursor:pointer;}
+.exam-opt .oe{font-size:22px;}
+.exam-opt:hover{border-color:var(--ap-gold);} .exam-opt.correct{border-color:var(--ap-com);background:#1c2e16;} .exam-opt.wrong{border-color:var(--ap-danger);background:#2e1614;}
+.exam-opt:disabled{cursor:default;}
+.grade-big{font-family:var(--font-disp);font-weight:900;font-size:78px;line-height:1;}
+
+/* ============ HELP / ONBOARDING ============ */
+.help-step{text-align:center;padding:8px 4px;}
+.help-step .hi{font-size:56px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));}
+.help-step h3{font-size:25px;color:var(--ap-gold);margin:8px 0;}
+.help-step p{font-size:19px;color:var(--ap-parch);line-height:1.32;max-width:440px;margin:0 auto;}
+.help-dots{display:flex;gap:7px;justify-content:center;margin:14px 0;}
+.help-dots i{width:9px;height:9px;border-radius:50%;background:#5a3d22;}.help-dots i.on{background:var(--ap-gold);}
+.set-row{display:flex;align-items:center;gap:12px;background:#1a120b;border:2px solid #5a3d22;border-radius:10px;padding:13px;margin-bottom:10px;}
+.set-row .si{font-size:28px;} .set-row .sd{flex:1;} .set-row .sd b{color:var(--ap-gold);font-size:18px;} .set-row .sd p{margin:2px 0 0;font-size:15px;color:var(--ap-parch-dk);}
+.toggle{width:54px;height:30px;border-radius:16px;border:2px solid #5a3d22;background:#1a120b;position:relative;cursor:pointer;flex-shrink:0;}
+.toggle i{position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#9a8358;transition:.2s;}
+.toggle.on{background:#2f5226;border-color:var(--ap-green);} .toggle.on i{left:26px;background:var(--ap-com);}
 </style>
 </head>
 <body>
 <canvas id="fxCanvas"></canvas>
+<div id="hudCtrls">
+  <button id="muteBtn" class="hudbtn" onclick="toggleMute()" title="Sound on/off">🔊</button>
+  <button class="hudbtn" onclick="openHelp()" title="How to play">❓</button>
+  <button class="hudbtn" onclick="openSettings()" title="Settings">⚙️</button>
+</div>
+<div id="combo"></div>
+<div id="finishHim"><div class="fht">⚔ FINISH IT ⚔</div><div class="fhs">One true compound ends this</div></div>
+<div id="vsBanner"></div>
 
 <!-- ===================== PASSWORD GATE ===================== -->
 <div id="gate">
@@ -402,6 +469,7 @@ button{font-family:var(--font-read);cursor:pointer;}
     <div class="spacer"></div>
     <div class="stat">🪙 <b id="m_coins">0</b></div>
     <div class="stat">📖 <b id="m_mastered">0</b>/<b id="m_deck">39</b></div>
+    <button class="navbtn" onclick="startDaily()">🗓 DAILY</button>
     <button class="navbtn ghost" onclick="openStudy()">📚 STUDY</button>
     <button class="navbtn ghost" onclick="openGrimoire()">📖 GRIMOIRE</button>
     <button class="navbtn ghost" onclick="openShop()">🛒 SHOP</button>
@@ -456,6 +524,7 @@ button{font-family:var(--font-read);cursor:pointer;}
       <div class="panel">
         <h3>⚗️ Compounding Bench</h3>
         <div class="formrow" id="formRow"></div>
+        <div class="doserow" id="doseRow"></div>
         <div class="cauldron" id="cauldron"></div>
         <div class="slots" id="slots"><span class="slot-empty">— add botanicals from the shelf —</span></div>
         <button class="brewbtn" id="brewBtn" onclick="brew()">⚗️ COMPOUND &amp; DISPENSE</button>
@@ -486,6 +555,9 @@ button{font-family:var(--font-read);cursor:pointer;}
 <div class="overlay" id="resultOverlay"><div class="modal" id="resultModal"></div></div>
 <div class="overlay" id="grimOverlay" onclick="if(event.target===this)closeGrimoire()"><div class="modal" style="max-width:780px" id="grimModal"></div></div>
 <div class="overlay" id="shopOverlay" onclick="if(event.target===this)closeShop()"><div class="modal" id="shopModal"></div></div>
+<div class="overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()"><div class="modal" id="settingsModal"></div></div>
+<div class="overlay" id="helpOverlay" onclick="if(event.target===this)closeHelp()"><div class="modal" id="helpModal"></div></div>
+<div class="overlay" id="examOverlay"><div class="modal" id="examModal" style="max-width:700px"></div></div>
 
 <!-- ===================== CUTSCENE ===================== -->
 <div id="cutscene">
@@ -667,13 +739,84 @@ const ZONES=[
 ];
 const getZone=id=>ZONES.find(z=>z.id===id);
 
+/* ---------- BOSS DIALOGUE (intro / enrage@50% / frenzy@25% / streak / death) ---------- */
+const BOSSDLG={
+ nervine:{
+  intro:['You will not rest until I do.','Every racing thought feeds me.','Sleep is mine to withhold.'],
+  enrage:['You loosen my grip on the GABA gates?!','My cortisol surges — I will not yield!','So you know your anxiolytics. Troublesome.'],
+  frenzy:['My limbic storm... is breaking...','The benzodiazepine calm... it spreads...','The parasympathetic tide... rises against me...'],
+  streak:['Valerenic acid, apigenin — you name them all.','Each remedy quiets another firing neuron.','You read the nervous system like a map.'],
+  death:['At last... my synapses... fall... silent...','Rest... claims... even... me...','The glymphatic tide... washes... me... away...']
+ },
+ cardio:{
+  intro:['Every vessel I touch runs thick.','I am the clot that will not dissolve.','Your patients bleed or clot — I decide.'],
+  enrage:['You thin what I thicken?!','My platelets aggregate — fight on!','An anticoagulant mind... how vexing.'],
+  frenzy:['My fibrin... unravels...','The INR climbs... beyond my reach...','Perfusion returns... and I am undone...'],
+  streak:['Hawthorn, ginkgo, allicin — wielded well.','You weigh every bleeding risk. Annoying.','Each correct dose loosens my grip on the lumen.'],
+  death:['My ejection fraction... drops... to zero...','The clot... lyses... at last...','Sinus rhythm... without... me...']
+ },
+ gut:{
+  intro:['I sour every stomach I crawl through.','Reflux and ruin follow my tide.','Your gut is my churning kingdom.'],
+  enrage:['You dare soothe the mucosa I inflame?!','My bile rises — I am not finished!','A demulcent defense... clever.'],
+  frenzy:['My peristalsis... fails me...','The mucilage... coats... everything...','The acid retreats... I cannot hold...'],
+  streak:['Ginger, fennel, slippery elm — a steady hand.','You spare the liver and calm the gut.','Every right prep settles my storm.'],
+  death:['My motility... ceases...','The gut... finds... peace...','I dissolve... into bitter... nothing...']
+ },
+ immuno:{
+  intro:['Breathe me in. Your defenses are mine.','I am the fog that fells the well.','Your immunity bends to my haze.'],
+  enrage:['You rally the lymphocytes against me?!','My cytokines storm — press on!','An immunologist? How tiresome.'],
+  frenzy:['The interferon... burns... through me...','Antibodies... swarm... the miasma...','My fog... lifts... against my will...'],
+  streak:['Elderberry, astragalus — you know friend from foe.','You guard the autoimmune from the boost.','Each true remedy clears my haze.'],
+  death:['The fever... breaks... at last...','My miasma... scatters... to clean air...','Immunity... rises... without... me...']
+ },
+ topical:{
+  intro:['I blister the skin you try to soothe.','Every wound is my doorway.','Your barrier breaks — I am through it.'],
+  enrage:['You close the skin I tear open?!','My inflammation flares — fight!','A wound-healer... irritating.'],
+  frenzy:['My erythema... fades...','The epithelium... knits... shut...','Granulation... seals... me... out...'],
+  streak:['Aloe, calendula, capsaicin — placed just right.','You know intact skin from broken. Good.','Each salve drives me from the dermis.'],
+  death:['My rash... cools... to nothing...','The skin... remembers... how to heal...','I flake... away... at last...']
+ },
+ toxic:{
+  intro:['Six wilds fed me. Now taste my cabinet of poisons.','I am every dose that became a death.','Refuse me, and you refuse yourself.'],
+  enrage:['You will not be tempted to compound?!','My alkaloids call — surely just one dose...','Restraint? The hardest medicine of all.'],
+  frenzy:['You answer poison... with wisdom...','My nightshades... wither... in your refusal...','The antidote was never a plant — it was you...'],
+  streak:['Belladonna, digitalis, coniine — you name and refuse them.','Every refusal starves my power.','You know the dose makes the poison.'],
+  death:['The poison... finds no... vessel...','Undone... not by a cure... but by a choice...','The wise apothecary knows... when not... to dispense...']
+ }
+};
+function bossSpeak(ctx){
+  const dlg=BOSSDLG[S.zone&&S.zone.id];if(!dlg||!dlg[ctx])return;
+  const arr=dlg[ctx],line=arr[Math.floor(Math.random()*arr.length)];
+  const el=document.getElementById('bossTaunt');if(el){el.textContent='“'+line+'”';el.style.animation='none';void el.offsetWidth;el.style.animation='subin .5s ease';}
+}
+
+/* ---------- CONTENT EXPANSION: +8 botanicals, +6 cases, dose ---------- */
+DECK.push(
+ {id:'hops',nm:'Hops',lat:'Humulus lupulus',emoji:'🍺',rar:'common',z:'nervine',action:'Sedative · bitter',use:'Insomnia, restlessness, nervous tension.',warn:'Additive sedation with alcohol/CNS depressants. Estrogenic — caution in hormone-sensitive conditions; can deepen depression.',prep:'Tea or tincture; classically paired with valerian.',forms:['tea','tinct'],drug:'2-methyl-3-buten-2-ol (sedative)',bridge:'Hops degrade into a sedative alcohol — the same drowsy chemistry as a "nightcap," minus the alcohol.'},
+ {id:'skullcap',nm:'Skullcap',lat:'Scutellaria lateriflora',emoji:'🌿',rar:'rare',z:'nervine',action:'Anxiolytic · nervine relaxant',use:'Anxiety, nervous tension, mild tremor.',warn:'Additive sedation; rare hepatotoxicity (often from germander adulteration).',prep:'Tincture or tea of the aerial parts.',forms:['tinct','tea'],drug:'Baicalin (GABA-A modulator)',bridge:'Its flavonoid baicalin modulates GABA-A — another botanical knocking on the benzodiazepine door.'},
+ {id:'hibiscus',nm:'Hibiscus',lat:'Hibiscus sabdariffa',emoji:'🌺',rar:'common',z:'cardio',action:'Antihypertensive · diuretic · antioxidant',use:'Mild high blood pressure; a tart, refreshing tea.',warn:'Adds to antihypertensives (low BP); mild diuretic; can alter some drug levels. Avoid high doses in pregnancy.',prep:'Tart infusion (tea) of the calyces.',forms:['tea'],drug:'ACE-inhibitor-adjacent (anthocyanins)',bridge:'Hibiscus anthocyanins mildly inhibit ACE — the same enzyme lisinopril blocks to lower blood pressure.'},
+ {id:'dandelion',nm:'Dandelion',lat:'Taraxacum officinale',emoji:'🌼',rar:'common',z:'gut',action:'Bitter digestive · diuretic · choleretic',use:'Sluggish digestion, bloating, mild fluid retention.',warn:'Asteraceae allergy. Potassium-sparing diuretic effect; caution with diuretics/lithium. Avoid with bile-duct obstruction.',prep:'Root decoction (bile/digestion) or leaf tea (diuretic).',forms:['decoct','tea'],drug:'Potassium-sparing diuretic (like spironolactone)',bridge:'Dandelion leaf diureses while SPARING potassium — echoing spironolactone, while its bitters prime bile flow.'},
+ {id:'reishi',nm:'Reishi',lat:'Ganoderma lucidum',emoji:'🍄',rar:'rare',z:'immuno',action:'Adaptogen · immunomodulator',use:'Immune support, stress resilience, sleep quality.',warn:'Adds to anticoagulants and antihypertensives. Caution in autoimmune disease and with immunosuppressants.',prep:'Decoction of the dried mushroom, or tincture.',forms:['decoct','tinct'],drug:'Beta-glucan immunomodulators',bridge:'Reishi beta-glucans train innate immune cells — the molecule class studied as vaccine adjuvants.'},
+ {id:'witchhazel',nm:'Witch Hazel',lat:'Hamamelis virginiana',emoji:'🌿',rar:'common',z:'topical',action:'Astringent · anti-inflammatory (topical)',use:'Hemorrhoids, oily skin, insect bites, minor irritation.',warn:'Topical only — the tannins irritate the stomach if swallowed.',prep:'Topical wash, compress, or salve.',forms:['salve'],drug:'Tannin astringent (hemorrhoid pads)',bridge:'Its tannins tighten and dry inflamed tissue — the active principle in drugstore witch-hazel pads and toners.'},
+ {id:'teatree',nm:'Tea Tree',lat:'Melaleuca alternifolia',emoji:'🌿',rar:'common',z:'topical',action:'Antimicrobial · antifungal (topical)',use:'Acne, athlete\'s foot/fungal skin, minor cuts.',warn:'⚠ TOPICAL only — the oil is toxic swallowed (ataxia, CNS depression). Dilute; can irritate/sensitize skin.',prep:'Diluted essential oil applied to skin.',forms:['oil','salve'],drug:'Terpinen-4-ol (botanical antiseptic)',bridge:'Its terpinen-4-ol disrupts microbial membranes — a plant antiseptic comparable to OTC acne and antifungal washes.'},
+ {id:'oleander',nm:'Oleander',lat:'Nerium oleander',emoji:'🌸',rar:'danger',z:'toxic',action:'(Ornamental cardiac poison — no safe use)',use:'None — every part is lethally toxic.',warn:'⚠⚠ Oleandrin is a potent cardiac glycoside — lethal arrhythmia from a few leaves, or even smoke from burning it. No safe dose.',prep:'NONE. Never dispense.',forms:[],drug:'Oleandrin (digoxin-class glycoside)',bridge:'Oleandrin poisons the Na+/K+ pump like digoxin and foxglove — but with no medicinal form, it is pure poison.'}
+);
+getZone('nervine').cases.push({av:'🌗',who:'Brenda · 53 · menopausal night sweats',complaint:'"Hot flashes wake me every night and I can\'t fall back asleep. No prescriptions, healthy liver."',flags:[{t:'No meds · healthy liver',c:'note'}],good:['hops','valerian'],goodForms:['tea','tinct'],alt:['skullcap','passionflower'],altForms:['tinct','tea'],trapIds:[],reward:35,teach:'Hops and valerian are classic sleep nervines (hops is mildly estrogenic, handy in menopause); skullcap and passionflower ease nervous tension. All are fair game because her liver is healthy and she takes no sedatives.'});
+getZone('cardio').cases.push({av:'🧉',who:'Theo · 48 · borderline BP, loves tart drinks',complaint:'"My blood pressure runs a little high, no meds yet. I\'d love something I can drink daily that tastes good."',flags:[{t:'No current meds',c:'note'}],good:['hibiscus'],goodForms:['tea'],alt:['hawthorn','garlic'],altForms:['tea','tinct','cap'],trapIds:[],reward:35,teach:'Hibiscus tea mildly inhibits ACE (like lisinopril) and lowers blood pressure — a tasty daily option while he\'s on no interacting meds. It would be risky stacked on antihypertensives.'});
+getZone('gut').cases.push({av:'🍽️',who:'Gita · 39 · sluggish digestion',complaint:'"Heavy, bloated and slow after meals — like my digestion stalls. Healthy, not pregnant, no meds."',flags:[{t:'Healthy · no meds',c:'note'}],good:['dandelion','fennel'],goodForms:['decoct','tea'],alt:['ginger'],altForms:['tea','decoct'],trapIds:[],reward:35,teach:'Bitter dandelion root stimulates bile and digestion; fennel relieves bloating. Dandelion is potassium-SPARING (unlike most diuretics) — worth knowing if she were ever on lithium or other diuretics.'});
+getZone('immuno').cases.push({av:'🧘',who:'Maya · 36 · burnt-out, catching colds',complaint:'"Burnout has me run-down and sick a lot. No autoimmune disease, no meds. I want resilience, not a quick fix."',flags:[{t:'No autoimmune / no meds',c:'note'}],good:['reishi','astragalus'],goodForms:['decoct','tinct','cap'],alt:['ginseng'],altForms:['decoct','cap'],trapIds:[],reward:40,teach:'Reishi and astragalus are adaptogenic immune tonics for long-haul resilience — appropriate because Maya has no autoimmune disease or immunosuppressants. They would be the wrong call for someone on methotrexate.'});
+getZone('topical').cases.push({av:'🧑',who:'Cole · 22 · acne & oily skin',complaint:'"My face breaks out and gets really oily. I want a natural topical that actually helps. Skin is intact."',flags:[{t:'Topical / intact skin',c:'note'}],good:['teatree'],goodForms:['oil','salve'],alt:['witchhazel'],altForms:['salve'],trapIds:[],reward:35,teach:'Diluted tea tree oil (terpinen-4-ol) is an evidence-backed topical antimicrobial for acne; witch hazel\'s tannins tame oiliness. Key point: tea tree oil is TOPICAL only — swallowing it is toxic.'});
+getZone('toxic').cases.push({av:'🌿',who:'A gardener · burned some shrubs',complaint:'"I trimmed and burned a big pink-flowering shrub, and now I feel sick and my heart keeps skipping. Brew me a strong oleander tea to build my tolerance."',flags:[{t:'EMERGENCY · cardiac',c:'med'}],good:[],goodForms:[],alt:[],altForms:[],answerIsRefuse:true,refuseId:'oleander',trapIds:['oleander','foxglove'],reward:55,hardTrap:true,teach:'⚠ This is oleander toxicity — even the SMOKE carries oleandrin, a digoxin-class cardiac glycoside. You never compound it; you REFUSE and send him to emergency care for cardiac monitoring (and digoxin-immune Fab if needed).'});
+(function(){var p=getZone('gut').cases.find(function(c){return /Priya/.test(c.who);});if(p){p.dose='gentle';p.teach+=' Keep the dose GENTLE in pregnancy.';}})();
+
 /* ---------- STATE ---------- */
 let S={coin:0, mastered:new Set(), cleared:new Set(), owned:new Set(),
-        achv:new Set(), srBox:{},
-        zone:null, caseIdx:0, hearts:3, form:null, bench:[], bossMax:0, bossHP:0, frenzied:false};
+        achv:new Set(), srBox:{}, muted:false, tourSeen:false, dailyBest:0, dailyDate:'',
+        zone:null, caseIdx:0, hearts:3, form:null, bench:[], dose:'standard', bossMax:0, bossHP:0,
+        frenzied:false, lowHP:false, streak:0, bestStreak:0, lastCorrect:false, finishReady:false};
 function load(){try{const sv=JSON.parse(localStorage.getItem('apq_full_v1')||'{}');
-  if(sv.coin!=null){S.coin=sv.coin;S.mastered=new Set(sv.mastered||[]);S.cleared=new Set(sv.cleared||[]);S.owned=new Set(sv.owned||[]);S.achv=new Set(sv.achv||[]);S.srBox=sv.srBox||{};}}catch(e){}}
-function save(){try{localStorage.setItem('apq_full_v1',JSON.stringify({coin:S.coin,mastered:[...S.mastered],cleared:[...S.cleared],owned:[...S.owned],achv:[...S.achv],srBox:S.srBox}));}catch(e){}}
+  if(sv.coin!=null){S.coin=sv.coin;S.mastered=new Set(sv.mastered||[]);S.cleared=new Set(sv.cleared||[]);S.owned=new Set(sv.owned||[]);S.achv=new Set(sv.achv||[]);S.srBox=sv.srBox||{};S.muted=!!sv.muted;S.tourSeen=!!sv.tourSeen;S.dailyBest=sv.dailyBest||0;S.dailyDate=sv.dailyDate||'';S.bestStreak=sv.bestStreak||0;}}catch(e){}}
+function save(){try{localStorage.setItem('apq_full_v1',JSON.stringify({coin:S.coin,mastered:[...S.mastered],cleared:[...S.cleared],owned:[...S.owned],achv:[...S.achv],srBox:S.srBox,muted:S.muted,tourSeen:S.tourSeen,dailyBest:S.dailyBest,dailyDate:S.dailyDate,bestStreak:S.bestStreak}));}catch(e){}}
 load();
 
 /* ============================================================
@@ -690,6 +833,7 @@ function tone(freq,dur,type,vol,whenOff){
   o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+0.05);
 }
 function sfx(name){
+  if(S.muted)return;
   if(name==='correct'){[523,659,784,1046].forEach((f,i)=>tone(f,0.5,'triangle',0.12,i*0.08));}
   else if(name==='wrong'){tone(140,0.4,'sawtooth',0.16);tone(90,0.5,'sawtooth',0.12,0.05);}
   else if(name==='hurt'){tone(70,0.5,'sawtooth',0.2);}
@@ -827,7 +971,7 @@ function renderMap(){
    ============================================================ */
 function enterZone(zid){
   sfx('click');
-  S.zone=getZone(zid);S.caseIdx=0;S.hearts=3;S.frenzied=false;
+  S.zone=getZone(zid);S.caseIdx=0;S.hearts=3;S.frenzied=false;S.lowHP=false;S.streak=0;S.finishReady=false;
   S.bossMax=S.zone.cases.length;S.bossHP=S.bossMax;
   document.getElementById('arena').style.setProperty('--zc',S.zone.color);
   document.getElementById('arena').style.setProperty('--arena-rgb',S.zone.rgb);
@@ -837,8 +981,15 @@ function enterZone(zid){
   document.getElementById('bossName').textContent=S.zone.boss.name;
   document.getElementById('bossMon').innerHTML=pixelMonster(S.zone);
   document.getElementById('cauldron').innerHTML=cauldronSVG();
-  renderForms();renderShelf();buildWeather();showScreen('benchScreen');
-  loadCase();updateBoss(S.zone.boss.taunt);
+  renderForms();renderShelf();buildWeather();setupDropZones();showScreen('benchScreen');
+  loadCase();updateBoss((BOSSDLG[zid]&&BOSSDLG[zid].intro)?BOSSDLG[zid].intro[0]:S.zone.boss.taunt);
+  showVS();
+  if(!S.tourSeen){S.tourSeen=true;save();setTimeout(openHelp,2700);}
+}
+function setupDropZones(){
+  ['slots','cauldron'].forEach(id=>{const el=document.getElementById(id);if(!el)return;
+    el.ondragover=e=>e.preventDefault();
+    el.ondrop=e=>{e.preventDefault();const hid=e.dataTransfer.getData('text/plain');if(hid)addToBench(hid);};});
 }
 function updateBoss(taunt){
   const pct=S.bossHP/S.bossMax*100;
@@ -883,7 +1034,8 @@ function renderShelf(){
   const sh=document.getElementById('shelf');sh.innerHTML='';
   zoneShelf().forEach(d=>{const r=RAR[d.rar];const c=document.createElement('div');
     c.className='icard'+(d.rar==='danger'?' danger':'')+(d.rar==='legendary'?' foil':'')+(S.mastered.has(d.id)?' mastered':'');
-    c.style.setProperty('--rar',r.c);c.title='Tap to study notecard';
+    c.style.setProperty('--rar',r.c);c.title='Tap to study · drag to the cauldron';
+    c.draggable=true;c.ondragstart=(ev)=>{ev.dataTransfer.setData('text/plain',d.id);ev.dataTransfer.effectAllowed='copy';};
     c.innerHTML='<span class="info" onclick="event.stopPropagation();showNote(\''+d.id+'\')">ⓘ</span><span class="rar">'+r.l+'</span>'+
       '<div class="emoji">'+d.emoji+'</div><div class="nm">'+d.nm+'</div><div class="lat">'+d.lat+'</div>'+
       '<button class="add" onclick="event.stopPropagation();addToBench(\''+d.id+'\')">+ ADD</button>';
@@ -909,13 +1061,19 @@ function tintCauldron(){
   liq.setAttribute('fill',col);
 }
 function loadCase(){
-  S.form=null;S.bench=[];const c=S.zone.cases[S.caseIdx];
+  S.form=null;S.bench=[];S.dose='standard';const c=S.zone.cases[S.caseIdx];
   const h=document.getElementById('caseHolder');
   const flags=c.flags.map(f=>'<span class="flag '+f.c+'">'+f.t+'</span>').join('');
   let refuseBtn = c.answerIsRefuse ? '<button class="btn ghost sm" style="width:100%;margin-top:6px" onclick="refuseDispense()">🚫 REFUSE TO DISPENSE</button>' : '';
   h.innerHTML='<div class="casecard"><div class="who"><span class="av">'+c.av+'</span>'+c.who+'</div>'+
     '<div class="complaint">'+c.complaint+'</div><div class="flagrow">'+flags+'</div></div>'+refuseBtn;
-  renderForms();renderSlots();tintCauldron();updateBoss(null);
+  renderForms();renderDose();renderSlots();tintCauldron();updateBoss(null);
+}
+const DOSES=[{id:'gentle',nm:'Gentle',di:'🌱'},{id:'standard',nm:'Standard',di:'⚖️'},{id:'strong',nm:'Strong',di:'🔥'}];
+function renderDose(){
+  const r=document.getElementById('doseRow');if(!r)return;r.innerHTML='';
+  DOSES.forEach(d=>{const b=document.createElement('button');b.className='dosechip'+(S.dose===d.id?' sel':'');
+    b.innerHTML='<span class="di">'+d.di+'</span>'+d.nm;b.onclick=()=>{S.dose=d.id;sfx('click');renderDose();};r.appendChild(b);});
 }
 
 /* ============================================================
@@ -942,8 +1100,8 @@ function closeNote(){document.getElementById('noteOverlay').classList.remove('sh
    ============================================================ */
 function refuseDispense(){
   const c=S.zone.cases[S.caseIdx];
-  if(c.answerIsRefuse){ damageBoss(); winCase(c,'good','🛡️','WISELY REFUSED',[{cls:'good',html:c.teach}]); }
-  else { loseHeart(); showResult('warn','🤷','A REMEDY WAS NEEDED',[{cls:'',html:'This patient genuinely needed a preparation — refusing wasn\'t the answer here. '+c.teach}]); }
+  if(c.answerIsRefuse){ S.lastCorrect=true; S.coin+=c.reward; damageBoss(); winCase(c,'good','🛡️','WISELY REFUSED',[{cls:'good',html:c.teach}]); }
+  else { S.lastCorrect=false; S.streak=0; loseHeart(); showResult('warn','🤷','A REMEDY WAS NEEDED',[{cls:'',html:'This patient genuinely needed a preparation — refusing wasn\'t the answer here. '+c.teach}]); }
 }
 function brew(){
   const c=S.zone.cases[S.caseIdx];
@@ -957,33 +1115,39 @@ function brew(){
   setTimeout(()=>{pot.style.transform='';btn.disabled=false;grade(c);},900);
 }
 function grade(c){
+  S.lastCorrect=false;
   const chosen=new Set(S.bench);
   if(c.answerIsRefuse){ // these cases must be refused; any compound is dangerous
-    loseHeart();const tHit=(c.trapIds||[]).filter(t=>chosen.has(t));
-    let lines=[{cls:'bad',html:'You should NOT have compounded anything here.'}];
+    S.streak=0;loseHeart();const tHit=(c.trapIds||[]).filter(t=>chosen.has(t));
+    let lines=[{cls:'bad',html:'You should NOT have compounded anything here — the right action was to refuse and refer.'}];
     if(tHit.length){const d=byId(tHit[0]);lines.unshift({cls:'bad',html:'<b>'+d.nm+'</b> is a poison, not a remedy.'});}
     lines.push({cls:'',html:c.teach});
-    bossAttack();showResult('bad','☠️','DANGEROUS DISPENSE',lines);return;
+    bossAttack();bossSpeak('frenzy');showResult('bad','☠️','DANGEROUS DISPENSE',lines);return;
   }
   const trapsHit=(c.trapIds||[]).filter(t=>chosen.has(t));
   const correctSet=new Set([...(c.good||[]),...(c.alt||[])]);
   const hasGood=[...chosen].some(x=>correctSet.has(x));
   const allValid=[...chosen].every(x=>correctSet.has(x));
   const okForm=(c.goodForms||[]).includes(S.form)||(c.altForms||[]).includes(S.form);
+  const okDose=!c.dose||S.dose===c.dose;
   if(trapsHit.length){
-    loseHeart();let lines=[];
+    S.streak=0;loseHeart();let lines=[];
     trapsHit.forEach(t=>{const d=byId(t);lines.push({cls:'bad',html:'<b>'+d.nm+'</b> was the wrong call. '+shortWarn(t,c)});});
     lines.push({cls:'',html:c.teach});
     bossAttack();showResult('bad',c.hardTrap?'☠️':'⚠️',c.hardTrap?'DANGEROUS DISPENSE':'WRONG REMEDY',lines);
-  } else if(hasGood&&allValid&&okForm){
+  } else if(hasGood&&allValid&&okForm&&okDose){
+    S.lastCorrect=true;
     [...chosen].forEach(x=>{if(correctSet.has(x))S.mastered.add(x);});
     S.coin+=c.reward;damageBoss();
     winCase(c,'good','✨','PERFECT COMPOUND',[{cls:'good',html:'Spot on. '+c.teach}]);
+  } else if(hasGood&&allValid&&okForm&&!okDose){
+    const dl={gentle:'a GENTLE',standard:'a STANDARD',strong:'a STRONG'}[c.dose]||'a different';
+    showResult('warn','⚖️','RIGHT HERB, WRONG STRENGTH',[{cls:'',html:'Good botanical and form — but this patient needs '+dl+' dose. Adjust the strength and re-brew (no heart lost).'},{cls:'',html:c.teach}]);
   } else if(hasGood&&!okForm){
-    loseHeart();const gf=(c.goodForms||[]).concat(c.altForms||[]).map(f=>FORMS.find(x=>x.id===f).nm).join(' or ');
+    S.streak=0;loseHeart();const gf=(c.goodForms||[]).concat(c.altForms||[]).map(f=>FORMS.find(x=>x.id===f).nm).join(' or ');
     showResult('warn','🤔','RIGHT HERB, WRONG FORM',[{cls:'',html:'Good botanical — but the preparation matters. Try <b>'+gf+'</b>.'},{cls:'',html:c.teach}]);
   } else {
-    loseHeart();showResult('warn','🌀','INEFFECTIVE BLEND',[{cls:'',html:'This blend won\'t address the complaint. '+c.teach}]);
+    S.streak=0;loseHeart();showResult('warn','🌀','INEFFECTIVE BLEND',[{cls:'',html:'This blend won\'t address the complaint. '+c.teach}]);
   }
   save();
 }
@@ -1011,12 +1175,17 @@ function bossAttack(){
 }
 function damageBoss(){
   S.bossHP=Math.max(0,S.bossHP-1);sfx('correct');
+  S.streak++; if(S.streak>S.bestStreak)S.bestStreak=S.streak;
   const port=document.getElementById('bossPort');port.classList.add('hurt');
   const bp=port.getBoundingClientRect();
   burst(bp.left+bp.width/2,bp.top+bp.height/2,{n:14,colors:[S.zone.color,'#fff'],speed:4,life:34,size:4});
   setTimeout(()=>port.classList.remove('hurt'),360);
   const pct=S.bossHP/S.bossMax*100;
-  if(pct<=50&&pct>0&&!S.frenzied){S.frenzied=true;setTimeout(()=>toast('⚠ '+S.zone.boss.name+' is ENRAGED!'),200);}
+  if(S.streak>=3)showCombo(S.streak);
+  if(pct<=50&&pct>0&&!S.frenzied){S.frenzied=true;bossSpeak('enrage');setTimeout(()=>toast('⚠ '+S.zone.boss.name+' is ENRAGED!'),200);}
+  else if(pct<=25&&pct>0&&!S.lowHP){S.lowHP=true;bossSpeak('frenzy');}
+  else if(S.streak>=4&&S.streak%2===0)bossSpeak('streak');
+  if(S.bossHP===1&&!S.finishReady){S.finishReady=true;setTimeout(showFinish,520);}
   updateBoss(null);
 }
 function winCase(c,tier,icon,big,lines){ save();showResult(tier,icon,big,lines); }
@@ -1035,11 +1204,8 @@ function afterResult(){
   document.getElementById('resultOverlay').classList.remove('show');
   if(S.hearts<=0)return; // defeat already triggered
   if(S.bossHP<=0){bossShatter();return;}
-  // advance to next unsolved case (wrap if needed). We advance only after a correct (boss damaged) OR retry same on wrong.
-  // Determine: if last result reduced HP, move forward; else retry same case.
-  // Simpler: always move to next case index; if past end but boss alive, loop back to first unsolved.
-  S.caseIdx++;
-  if(S.caseIdx>=S.zone.cases.length){S.caseIdx=0;}
+  // Retry-until-correct: advance only on a correct compound; a wrong answer reloads the SAME case.
+  if(S.lastCorrect){ S.caseIdx++; if(S.caseIdx>=S.zone.cases.length)S.caseIdx=0; }
   loadCase();
 }
 function zoneDefeat(){
@@ -1139,6 +1305,7 @@ const ACHV=[
  {id:'first',test:()=>S.cleared.size>=1,t:'First Wild Healed'},
  {id:'half',test:()=>S.mastered.size>=Math.ceil(DECK.length/2),t:'Half the Grimoire'},
  {id:'safety',test:()=>S.cleared.has('toxic'),t:'Keeper of the Vault'},
+ {id:'combo',test:()=>S.bestStreak>=7,t:'Combo Alchemist'},
  {id:'full',test:()=>S.mastered.size>=DECK.length,t:'Master Apothecary'},
  {id:'rich',test:()=>S.coin>=300,t:'Coin Hoarder'}
 ];
@@ -1183,7 +1350,7 @@ function closeCutscene(){document.getElementById('cutscene').classList.remove('s
 /* ============================================================
    STUDY HALL
    ============================================================ */
-const STAB=[{id:'flash',ic:'🃏',nm:'Flashcards'},{id:'materia',ic:'📖',nm:'Materia Medica'},{id:'ix',ic:'⚠️',nm:'Interactions'},{id:'prog',ic:'📊',nm:'Progress'}];
+const STAB=[{id:'flash',ic:'🃏',nm:'Flashcards'},{id:'materia',ic:'📖',nm:'Materia Medica'},{id:'ix',ic:'⚠️',nm:'Interactions'},{id:'exam',ic:'📝',nm:'Exam'},{id:'prog',ic:'📊',nm:'Progress'}];
 let studyCur='flash';
 let FC={queue:[],idx:0,flipped:false,zoneFilter:'all',studied:0};
 
@@ -1205,12 +1372,22 @@ function renderStudyTabs(){
     b.innerHTML='<span>'+s.ic+'</span>'+s.nm;b.onclick=()=>studyTab(s.id);t.appendChild(b);});
 }
 function studyTab(id){studyCur=id;renderStudyTabs();sfx('click');
-  if(id==='flash')renderFlashTab();else if(id==='materia')renderMateria();else if(id==='ix')renderIx();else renderProg();}
+  if(id==='flash')renderFlashTab();else if(id==='materia')renderMateria();else if(id==='ix')renderIx();else if(id==='exam')renderExamTab();else renderProg();}
+function renderExamTab(){
+  const body=document.getElementById('studyBody');
+  body.innerHTML='<div class="studyhd"><h2>📝 Exam Mode</h2><p>A timed, scored test drawn from real patient cases across all six wilds. Earn a letter grade, +5 🪙 per correct, and review every miss.</p></div>'+
+    '<div style="text-align:center"><div style="font-size:60px">🎓</div>'+
+    '<p style="font-size:19px;color:var(--ap-parch);max-width:460px;margin:8px auto">10 questions · pick the safest botanical for each patient. Watch the safety flags!</p>'+
+    '<button class="btn green" style="margin-top:10px" onclick="startExam()">▶ BEGIN 10-QUESTION EXAM</button>'+
+    '<p style="font-size:16px;color:#9a8358;margin-top:16px">Prefer a fresh mix every day? Try the <b style="color:var(--ap-gold)">🗓 Daily Challenge</b> from the map.</p></div>';
+}
 
 /* ---- Flashcards (spaced repetition) ---- */
 function srLabel(b){return b>=2?'mastered':b===1?'familiar':'learning';}
 function buildFlashQueue(){
-  let ids=DECK.filter(d=>FC.zoneFilter==='all'||d.z===FC.zoneFilter).map(d=>d.id);
+  let ids;
+  if(FC.zoneFilter==='weak'){ids=DECK.filter(d=>(S.srBox[d.id]||0)<2).map(d=>d.id);if(!ids.length)ids=DECK.map(d=>d.id);}
+  else ids=DECK.filter(d=>FC.zoneFilter==='all'||d.z===FC.zoneFilter).map(d=>d.id);
   ids.sort((a,b)=>((S.srBox[a]||0)-(S.srBox[b]||0))||(Math.random()-0.5));
   FC.queue=ids;FC.idx=0;FC.flipped=false;
 }
@@ -1218,6 +1395,7 @@ function renderFlashTab(){
   if(!FC.queue.length)buildFlashQueue();
   const body=document.getElementById('studyBody');
   let filters='<button class="'+(FC.zoneFilter==='all'?'sel':'')+'" onclick="setFcZone(\'all\')">ALL</button>'+
+    '<button class="'+(FC.zoneFilter==='weak'?'sel':'')+'" style="--zcf:#ff5a4d" onclick="setFcZone(\'weak\')">⚡ WEAK</button>'+
     ZONES.map(z=>'<button class="'+(FC.zoneFilter===z.id?'sel':'')+'" style="--zcf:'+z.color+'" onclick="setFcZone(\''+z.id+'\')">'+z.emoji+' '+z.id+'</button>').join('');
   body.innerHTML='<div class="studyhd"><h2>🃏 Flashcards</h2><p>Active recall — read the plant, recall its uses, cautions &amp; the drug inside, then flip and rate yourself honestly.</p></div>'+
     '<div class="fcwrap"><div class="fcfilter">'+filters+'</div><div class="fcstat" id="fcStat"></div>'+
@@ -1243,7 +1421,8 @@ function renderFlash(){
     '<div class="note-sec"><span class="lbl prep">PREP</span><p>'+d.prep+'</p></div>'+
     '<div class="pharma"><div class="ph-lbl">💊 DRUG INSIDE</div><div class="ph-drug">'+d.drug+'</div><p>'+d.bridge+'</p></div></div>';
   inner.innerHTML=front+back;
-  document.getElementById('fcStat').innerHTML='Card <b>'+(FC.idx+1)+'</b>/'+FC.queue.length+' · '+(FC.zoneFilter==='all'?'All zones':getZone(FC.zoneFilter).name)+' · status: <b>'+srLabel(S.srBox[d.id]||0)+'</b> · studied this visit: <b>'+FC.studied+'</b>';
+  const fname=FC.zoneFilter==='all'?'All zones':FC.zoneFilter==='weak'?'Weak spots':getZone(FC.zoneFilter).name;
+  document.getElementById('fcStat').innerHTML='Card <b>'+(FC.idx+1)+'</b>/'+FC.queue.length+' · '+fname+' · status: <b>'+srLabel(S.srBox[d.id]||0)+'</b> · studied this visit: <b>'+FC.studied+'</b>';
 }
 function flipCard(){FC.flipped=!FC.flipped;const inn=document.getElementById('fcInner');if(inn)inn.className='fc-inner'+(FC.flipped?' flipped':'');sfx('click');}
 function rateCard(lvl){
@@ -1360,6 +1539,149 @@ function exportStudyGuide(){
 }
 
 /* ============================================================
+   VS BANNER · COMBO · FINISH IT
+   ============================================================ */
+function showVS(){
+  const z=S.zone,el=document.getElementById('vsBanner');el.style.setProperty('--zc',z.color);
+  const intro=(BOSSDLG[z.id]&&BOSSDLG[z.id].intro)?'“'+BOSSDLG[z.id].intro[0]+'”':'';
+  el.innerHTML='<div class="vsyou">THE APOTHECARY</div><div class="vsvs">⚔ VERSUS ⚔</div>'+
+    '<div class="vsmon">'+pixelMonster(z)+'</div><div class="vsboss">'+z.boss.name+'</div><div class="vssub">'+intro+'</div>';
+  el.classList.add('show');sfx('hurt');
+  clearTimeout(window._vsT);window._vsT=setTimeout(()=>el.classList.remove('show'),2400);
+}
+function showCombo(n){
+  const tiers=[{n:3,c:'#c0c0c0',l:'Steady hands'},{n:5,c:'#ffd700',l:'Master mixer'},{n:7,c:'#ff8a3d',l:'On fire'},{n:10,c:'#ff6cb6',l:'Legendary apothecary'}];
+  let pick=tiers[0];tiers.forEach(t=>{if(n>=t.n)pick=t;});
+  const el=document.getElementById('combo');el.style.color=pick.c;
+  el.innerHTML='<div class="ct" style="text-shadow:0 0 22px '+pick.c+'">×'+n+'</div><div class="cl">'+pick.l.toUpperCase()+'</div>';
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  burst(innerWidth/2,innerHeight*0.20,{n:10,colors:[pick.c,'#fff'],speed:5,life:36,size:4});
+}
+function showFinish(){
+  const el=document.getElementById('finishHim');el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  sfx('hurt');toast('⚔ FINISH IT — one true compound ends '+S.zone.boss.name);
+}
+
+/* ============================================================
+   AUDIO · SETTINGS · HELP · PWA
+   ============================================================ */
+function toggleMute(){S.muted=!S.muted;save();const b=document.getElementById('muteBtn');if(b)b.textContent=S.muted?'🔇':'🔊';if(!S.muted)sfx('click');toast(S.muted?'🔇 Sound off':'🔊 Sound on');}
+function openSettings(){
+  const m=document.getElementById('settingsModal');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">⚙️</span><div><div class="note-title">Settings</div><div class="note-lat">ApothecaryQuest</div></div><button class="closeb" onclick="closeSettings()">✕</button></div><div class="mbody">'+
+    '<div class="set-row"><span class="si">'+(S.muted?'🔇':'🔊')+'</span><div class="sd"><b>Sound</b><p>Procedural effects &amp; cues</p></div><div class="toggle'+(S.muted?'':' on')+'" onclick="toggleMute();openSettings()"><i></i></div></div>'+
+    '<div class="set-row"><span class="si">📲</span><div class="sd"><b>Install App</b><p>Add to home screen · play offline</p></div><button class="btn sm" onclick="installApp()">INSTALL</button></div>'+
+    '<div class="set-row"><span class="si">📄</span><div class="sd"><b>Study Guide</b><p>Export the printable PDF guide</p></div><button class="btn sm blue" onclick="exportStudyGuide()">EXPORT</button></div>'+
+    '<div class="set-row"><span class="si">❓</span><div class="sd"><b>How to Play</b><p>Replay the tutorial</p></div><button class="btn sm ghost" onclick="closeSettings();openHelp()">VIEW</button></div>'+
+    '<div class="set-row"><span class="si">🗑️</span><div class="sd"><b>Reset Progress</b><p>Erase mastery, coins &amp; cleared zones</p></div><button class="btn sm" style="background:linear-gradient(180deg,#ff9b90,#ff5a4d)" onclick="resetProgress()">RESET</button></div>'+
+    '<p style="font-size:14px;color:#7a6440;text-align:center;margin-top:10px">A teaching game by Dr. Akash Garg · password: <b style="color:var(--ap-gold)">Garg</b></p></div>';
+  document.getElementById('settingsOverlay').classList.add('show');
+}
+function closeSettings(){document.getElementById('settingsOverlay').classList.remove('show');}
+function resetProgress(){
+  if(!confirm('Erase ALL progress — mastery, coins, cleared zones, flashcards? This cannot be undone.'))return;
+  localStorage.removeItem('apq_full_v1');
+  S.coin=0;S.mastered=new Set();S.cleared=new Set();S.owned=new Set();S.achv=new Set();S.srBox={};S.dailyBest=0;S.dailyDate='';S.bestStreak=0;
+  closeSettings();toast('🗑️ Progress reset');gotoTitle();
+}
+const HELP=[
+ {hi:'⚗️',h:'Read the patient',p:'Every patient brings a complaint and safety flags — meds, pregnancy, allergies. The flags are everything: the same herb can heal one patient and harm another.'},
+ {hi:'🌿',h:'Pick form, botanicals & dose',p:'Choose a preparation form (tea, tincture, salve…), drag or tap botanicals onto the bench, set the strength, then COMPOUND. Tap any card to study its notecard first.'},
+ {hi:'🔬',h:'The drug inside',p:'Every plant reveals the modern drug hidden in it — willow→aspirin, foxglove→digoxin. Learn the bridge and the pharmacology comes free.'},
+ {hi:'⚔️',h:'Break the boss',p:'A correct compound damages the zone boss; a wrong one costs a heart and you retry the same patient. Clear all six wilds — and in the Toxic Vault, the right answer is sometimes to REFUSE.'},
+ {hi:'📚',h:'Study Hall & Exams',p:'Flashcards with spaced repetition, a searchable Materia Medica, interaction tables, timed Exam Mode, a Daily Challenge, and a printable study guide. Good luck, Apothecary!'}
+];
+let helpIdx=0;
+function openHelp(){helpIdx=0;renderHelp();document.getElementById('helpOverlay').classList.add('show');}
+function renderHelp(){
+  const s=HELP[helpIdx],m=document.getElementById('helpModal');
+  const dots=HELP.map((_,i)=>'<i class="'+(i===helpIdx?'on':'')+'"></i>').join('');
+  m.innerHTML='<div class="mbody"><div class="help-step"><div class="hi">'+s.hi+'</div><h3>'+s.h+'</h3><p>'+s.p+'</p></div>'+
+    '<div class="help-dots">'+dots+'</div><div style="display:flex;gap:10px;justify-content:center">'+
+    (helpIdx>0?'<button class="btn ghost sm" onclick="helpNav(-1)">‹ BACK</button>':'')+
+    (helpIdx<HELP.length-1?'<button class="btn sm" onclick="helpNav(1)">NEXT ›</button>':'<button class="btn green sm" onclick="closeHelp()">✓ GOT IT</button>')+
+    '</div></div>';
+}
+function helpNav(d){helpIdx=Math.max(0,Math.min(HELP.length-1,helpIdx+d));sfx('click');renderHelp();}
+function closeHelp(){document.getElementById('helpOverlay').classList.remove('show');}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+function installApp(){ if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;});} else {toast('On iPhone: Share → Add to Home Screen');} }
+
+/* ============================================================
+   QUIZ ENGINE (Exam Mode + Daily Challenge)
+   ============================================================ */
+let QZ=null;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+function allCases(){const a=[];ZONES.forEach(z=>z.cases.forEach(c=>a.push({z:z,c:c})));return a;}
+function makeQuestion(entry){
+  const c=entry.c,z=entry.z,opts=[];
+  if(c.answerIsRefuse){
+    opts.push({id:'__refuse__',emoji:'🚫',label:'Refuse to dispense & refer',correct:true});
+    shuffle(c.trapIds||[]).slice(0,3).forEach(t=>{const d=byId(t);if(d)opts.push({id:t,emoji:d.emoji,label:'Compound '+d.nm,correct:false});});
+  } else {
+    const good=(c.good&&c.good[0])||(c.alt&&c.alt[0]);const gd=byId(good);
+    opts.push({id:good,emoji:gd.emoji,label:gd.nm,correct:true});
+    let pool=(c.trapIds&&c.trapIds.length?c.trapIds.slice():[]).concat(DECK.filter(d=>d.z===z.id).map(d=>d.id));
+    shuffle(pool).forEach(t=>{if(opts.length>=4)return;const d=byId(t);if(d&&d.id!==good&&!opts.find(o=>o.id===t))opts.push({id:t,emoji:d.emoji,label:d.nm,correct:false});});
+  }
+  while(opts.length<4){const r=DECK[Math.floor(Math.random()*DECK.length)];if(!opts.find(o=>o.id===r.id))opts.push({id:r.id,emoji:r.emoji,label:r.nm,correct:false});}
+  return {z,c,opts:shuffle(opts),teach:c.teach};
+}
+function runQuiz(o){
+  QZ={title:o.title,qs:o.entries.map(makeQuestion),idx:0,score:0,misses:[],t0:Date.now(),timed:!!o.timed,daily:!!o.daily,answered:false,timer:null};
+  document.getElementById('examOverlay').classList.add('show');renderQuiz();sfx('click');
+  if(QZ.timed)QZ.timer=setInterval(quizTick,1000);
+}
+function renderQuiz(){
+  const q=QZ.qs[QZ.idx];QZ.answered=false;const m=document.getElementById('examModal');
+  const optsH=q.opts.map((o,i)=>'<button class="exam-opt" id="opt'+i+'" onclick="answerQuiz('+i+')"><span class="oe">'+o.emoji+'</span>'+o.label+'</button>').join('');
+  m.innerHTML='<div class="mhead"><span class="note-emoji">📝</span><div><div class="note-title">'+QZ.title+'</div>'+
+    '<div class="note-lat">Question '+(QZ.idx+1)+' / '+QZ.qs.length+'</div></div><button class="closeb" onclick="quitQuiz()">✕ QUIT</button></div>'+
+    '<div class="mbody"><div class="exam-bar"><span>Score: <b style="color:var(--ap-gold)">'+QZ.score+'</b></span><span class="tmr" id="qzTmr">'+(QZ.timed?'⏱ 0s':'')+'</span></div>'+
+    '<div class="exam-q"><div class="qcase"><div class="qw">'+q.z.emoji+' '+q.c.who+'</div><div class="qc">'+q.c.complaint+'</div></div>'+
+    '<div style="font-size:16px;color:#9a8358;margin-bottom:8px">Which is the safest, best choice?</div>'+optsH+'</div></div>';
+}
+function answerQuiz(i){
+  if(QZ.answered)return;QZ.answered=true;const q=QZ.qs[QZ.idx],o=q.opts[i];
+  q.opts.forEach((oo,j)=>{const b=document.getElementById('opt'+j);if(!b)return;b.disabled=true;if(oo.correct)b.classList.add('correct');});
+  if(o.correct){QZ.score++;sfx('correct');}else{const b=document.getElementById('opt'+i);if(b)b.classList.add('wrong');sfx('wrong');QZ.misses.push(q);}
+  const fb=document.createElement('div');
+  fb.style.cssText='margin-top:10px;font-size:17px;color:var(--ap-parch);background:#1a120b;border-left:4px solid '+(o.correct?'var(--ap-com)':'var(--ap-danger)')+';border-radius:6px;padding:11px;line-height:1.25';
+  fb.innerHTML=(o.correct?'✅ Correct. ':'❌ ')+q.teach+'<div style="text-align:right;margin-top:8px"><button class="btn sm" onclick="nextQuiz()">'+(QZ.idx>=QZ.qs.length-1?'SEE RESULTS':'NEXT →')+'</button></div>';
+  document.getElementById('examModal').querySelector('.exam-q').appendChild(fb);
+}
+function nextQuiz(){QZ.idx++;if(QZ.idx>=QZ.qs.length){finishQuiz();return;}renderQuiz();}
+function quizTick(){if(!QZ)return;const el=document.getElementById('qzTmr');if(el)el.textContent='⏱ '+Math.floor((Date.now()-QZ.t0)/1000)+'s';}
+function finishQuiz(){
+  if(QZ.timer)clearInterval(QZ.timer);
+  const pct=Math.round(QZ.score/QZ.qs.length*100),secs=Math.floor((Date.now()-QZ.t0)/1000);
+  const grade=pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';
+  const gc=pct>=80?'var(--ap-com)':pct>=60?'var(--ap-gold)':'var(--ap-danger)';
+  S.coin+=QZ.score*5;
+  if(QZ.daily){S.dailyBest=(S.dailyDate===todayKey())?Math.max(S.dailyBest,QZ.score):QZ.score;S.dailyDate=todayKey();}
+  save();
+  const missH=QZ.misses.length?'<h3 style="font-size:17px;color:var(--ap-gold);margin:14px 0 8px">Review your misses</h3>'+QZ.misses.map(q=>'<div style="font-size:16px;background:#1a120b;border-left:3px solid var(--ap-danger);border-radius:6px;padding:9px;margin-bottom:7px;line-height:1.25">'+q.z.emoji+' <b>'+q.c.who+'</b><br>'+q.teach+'</div>').join(''):'<p style="color:var(--ap-com);font-size:20px;text-align:center;margin-top:10px">Flawless — no misses! 🌟</p>';
+  document.getElementById('examModal').innerHTML='<div class="mhead"><span class="note-emoji">🎓</span><div><div class="note-title">'+QZ.title+' — Results</div><div class="note-lat">'+secs+'s · +'+(QZ.score*5)+' 🪙</div></div><button class="closeb" onclick="quitQuiz()">✕ CLOSE</button></div>'+
+    '<div class="mbody" style="text-align:center"><div class="grade-big" style="color:'+gc+'">'+grade+'</div>'+
+    '<div style="font-size:24px;color:var(--ap-parch)">'+QZ.score+' / '+QZ.qs.length+' correct ('+pct+'%)</div>'+
+    (QZ.daily?'<div style="font-size:17px;color:var(--ap-gold);margin-top:6px">🗓 Today\'s best: '+S.dailyBest+' / '+QZ.qs.length+'</div>':'')+
+    '<div style="text-align:left">'+missH+'</div><button class="btn" style="margin-top:14px" onclick="quitQuiz()">DONE</button></div>';
+  if(pct>=80)coinShower(); else sfx('wrong');
+  checkAchievements();
+}
+function quitQuiz(){if(QZ&&QZ.timer)clearInterval(QZ.timer);QZ=null;document.getElementById('examOverlay').classList.remove('show');
+  if(document.getElementById('mapScreen').classList.contains('active'))renderMap();}
+function startExam(){runQuiz({title:'Apothecary Exam',entries:shuffle(allCases()).slice(0,10),timed:true});}
+function startDaily(){
+  const r=rngFrom(hashStr(todayKey())),pool=allCases();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  runQuiz({title:'Daily Challenge',entries:pool.slice(0,8),timed:true,daily:true});
+}
+
+/* ============================================================
    TOAST + BOOT
    ============================================================ */
 let toastT;
@@ -1368,6 +1690,20 @@ function toast(msg){const t=document.getElementById('toast');t.className='toast 
 initFloatHerbs('floatHerbs');initFloatHerbs('gateHerbs');
 window.addEventListener('load',function(){var pw=document.getElementById('pw');if(pw)pw.focus();});
 document.getElementById('titleHint').textContent=ZONES.length+' zones · '+DECK.length+' botanicals · '+ZONES.reduce((n,z)=>n+z.cases.length,0)+' cases';
+(function(){var b=document.getElementById('muteBtn');if(b)b.textContent=S.muted?'🔇':'🔊';})();
+
+/* ---- PWA: inline manifest + best-effort service worker ---- */
+(function(){
+  try{
+    var icon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192"><rect width="192" height="192" fill="#1a120b"/><text x="96" y="138" font-size="120" text-anchor="middle">⚗️</text></svg>');
+    var manifest={name:'ApothecaryQuest',short_name:'Apothecary',start_url:'.',display:'standalone',background_color:'#1a120b',theme_color:'#1a120b',icons:[{src:icon,sizes:'192x192',type:'image/svg+xml'},{src:icon,sizes:'512x512',type:'image/svg+xml'}]};
+    var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/json'}));document.head.appendChild(ml);
+  }catch(e){}
+  if('serviceWorker' in navigator){ try{
+    var sw='self.addEventListener("install",function(e){self.skipWaiting();});self.addEventListener("activate",function(e){self.clients.claim();});self.addEventListener("fetch",function(e){});';
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))).catch(function(){});
+  }catch(e){} }
+})();
 addEventListener('keydown',e=>{ if(document.getElementById('gate').style.display!=='none'&&document.getElementById('gate').style.opacity!=='0')return;
   if(document.getElementById('titleScreen').classList.contains('active')&&(e.key==='Enter'||e.key===' '))gotoMap(); });
 addEventListener('keydown',e=>{
